@@ -45,5 +45,5 @@ echo "Starting QEMU"
 
 remmina -c vnc://127.0.0.1:5900 >/dev/null 2>/dev/null &
 
-~/Téléchargements/qemu/build/qemu-system-x86_64 OS.bin -s -S
+~/Téléchargements/qemu/build/qemu-system-x86_64 OS.bin >/dev/null 2>/dev/null
 

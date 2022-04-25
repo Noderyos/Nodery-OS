@@ -3,7 +3,7 @@
 ## 25/04/22:
 
 => Adding documentation to the code<br>
-=> Adding int2hex() function
+=> Adding int2hex() function<br>
 int2hex(i) Usage :
 ```c
 int i = 10;
@@ -12,7 +12,7 @@ printString(int2hex(i)); // Print 0A
 ## 23/04/22:
 
 => Adding the C main function load<br>
-=> Adding print functions : `printChar()`,`printString()`, `moveCursor(w,h)`
+=> Adding print functions : `printChar()`,`printString()`, `moveCursor(w,h)`<br>
 printChar() Usage : 
 ```c
 char c = 'a';

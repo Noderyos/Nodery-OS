@@ -1,1 +1,1 @@
-times 1 db 0
+times 1 db 0 ; Simply add bytes to zero target bin (sometimes the code doesn't work if I not increment this value (WHY ?????))

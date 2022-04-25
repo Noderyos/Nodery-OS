@@ -3,8 +3,6 @@ section .text
 
 extern main
 
-call main
+call main ; Call the main function in kernel.c
 
-%include "src/kernel/keyboard.asm"
-
-jmp $
+jmp $ ; Do nothing

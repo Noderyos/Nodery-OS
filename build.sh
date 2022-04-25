@@ -2,18 +2,13 @@
 
 echo "Compiling OS ..."
 
-
-
 echo "[nasm] Compiling main.asm"
 
 nasm "src/main.asm" -f bin -o "build/main.bin"
 
-
-
 echo "[nasm] Compiling entry.asm"
 
 nasm "src/entry.asm" -f elf -o "build/entry.o"
-
 
 o_files=""
 
@@ -39,11 +34,8 @@ echo "[cat] > Concatenaing full_kernel.bin + zeroes.bin => OS.bin"
 
 cat "build/main.bin" "build/full_kernel.bin" "build/zeroes.bin"  > "OS.bin"
 
-
-
 echo "Starting QEMU"
 
 remmina -c vnc://127.0.0.1:5900 >/dev/null 2>/dev/null &
 
 ~/Téléchargements/qemu/build/qemu-system-x86_64 OS.bin >/dev/null 2>/dev/null
-

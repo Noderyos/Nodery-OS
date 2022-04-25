@@ -1,14 +1,20 @@
-#include "print.h"
+#include "io.h"
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 #define VIDEO_ADDRESS 0xb8000
+// Video address usage :
+// to print a char you need to specify the char and the color code 
+// [First char ascii code][First char color code]
+// [Second char ascii code][Second char color code]
+// [Third char ascii code][Third char color code]
+
 
 int curW;
 int curH;
 
 void printChar(char c){
-	if(c == '\n'){
+	if(c == '\n'){ // Detect new line char
 		printnewLine();
 		return;
 	}

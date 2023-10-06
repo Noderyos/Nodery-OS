@@ -15,13 +15,13 @@ int curH;
 
 void printChar(char c){
 	if(c == '\n'){ // Detect new line char
-		printnewLine();
+		printNewLine();
 		return;
 	}
 	*(char*)(VIDEO_ADDRESS + (curH*SCREEN_WIDTH*2) + (curW*2)) = c;
 	curW++;
 	if(curW >= SCREEN_WIDTH){
-		printnewLine();
+		printNewLine();
 	}
 	return;
 }
@@ -29,7 +29,6 @@ void printChar(char c){
 void printString(char* string){
 	for (int i = 0; 1; i++) {
 		char character = (int) string[i];
-
 		if (character == '\0') {
 			return;
 		}
@@ -38,7 +37,7 @@ void printString(char* string){
 	return;
 }
 
-void printnewLine(){
+void printNewLine(){
 	curW = 0;
 	curH++;
 	if(curH == SCREEN_HEIGHT){

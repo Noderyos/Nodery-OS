@@ -17,10 +17,11 @@ TARGET = kernel.bin
 MKDIR_P = mkdir -p
 
 all: kernel boot
-	bin/i386-elf-ld -o $(KERNEL) -Ttext 0x1000 $(OBJ_DIR)/boot/entry.o $(OBJS) --oformat binary
+	bin/i386-elf-ld -o $(KERNEL) -Ttext 0x1000 $(OBJ_DIR)/boot/entry.o $(OBJS) $(OBJ_DIR)/kernel/asm_keyboard.o --oformat binary
 	cat $(OBJ_DIR)/boot/main.o $(KERNEL) > $(TARGET) 
 
 kernel: $(OBJS)
+	nasm -f elf32 -o $(OBJ_DIR)/kernel/asm_keyboard.o src/kernel/keyboard.asm
 
 boot: 
 	$(MKDIR_P) $(OBJ_DIR)/boot 
@@ -32,4 +33,4 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 
 clean:
-	rm -rf $(OBJS) $(TARGET) $(KERNEL)
+	rm -rf $(OBJS) $(TARGET) $(KERNEL) $(OBJ_DIR)

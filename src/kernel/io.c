@@ -9,9 +9,19 @@
 // [Second char ascii code][Second char color code]
 // [Third char ascii code][Third char color code]
 
+extern void ioport_out(unsigned short port, unsigned char data);
 
 int curW;
 int curH;
+
+
+void updateCursor(){
+	unsigned short pos = (curH * SCREEN_WIDTH + curW);
+	ioport_out(0x3D4, 0x0F);
+	ioport_out(0x3D5, (uint8_t) (pos & 0xFF));
+	ioport_out(0x3D4, 0x0E);
+	ioport_out(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+}
 
 void printChar(char c){
 	if(c == '\n'){ // Detect new line char
@@ -23,6 +33,7 @@ void printChar(char c){
 	if(curW >= SCREEN_WIDTH){
 		printNewLine();
 	}
+	updateCursor();
 	return;
 }
 
@@ -44,6 +55,7 @@ void printNewLine(){
 		swipeTerm();
 		curH--;
 	}
+	updateCursor();
 	return;
 }
 

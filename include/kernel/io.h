@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+void updateCursor();
+
 void swipeTerm();
 
 void printNewLine();

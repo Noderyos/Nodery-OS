@@ -2,11 +2,11 @@ SRC_DIR = src
 OBJ_DIR = obj
 
 SRCS = $(shell find $(SRC_DIR) -type f -name "*.c")
-
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 
-BOOTSRCS = $(shell find $(SRC_DIR)/boot -type f -name "*.asm")
-BOOTOBJS = $(patsubst $(SRC_DIR)/%.asm,$(OBJ_DIR)/%.o,$(BOOTSRCS))
+ASMS = $(shell find $(SRC_DIR) -name "*.asm" -not -path "$(SRC_DIR)/boot/*")
+OBJS += $(patsubst $(SRC_DIR)/%.asm, $(OBJ_DIR)/%_asm.o, $(ASMS))
+
 
 CC = gcc
 CFLAGS = -Wall -Iinclude -ffreestanding -m32 -fno-pie
@@ -17,13 +17,12 @@ TARGET = kernel.bin
 MKDIR_P = mkdir -p
 
 all: kernel boot
-	bin/i386-elf-ld -T scripts/linker.ld -o $(KERNEL) -Ttext 0x1000 $(OBJ_DIR)/boot/entry.o $(OBJS) $(OBJ_DIR)/kernel/asm_keyboard.o --oformat binary
+	bin/i386-elf-ld -T scripts/linker.ld -o $(KERNEL) -Ttext 0x1000 $(OBJ_DIR)/boot/entry.o $(OBJS) --oformat binary
 	cat $(OBJ_DIR)/boot/main.o $(KERNEL) > $(TARGET) 
 
 kernel: $(OBJS)
-	nasm -f elf32 -o $(OBJ_DIR)/kernel/asm_keyboard.o src/kernel/keyboard.asm
 
-boot: 
+boot:
 	$(MKDIR_P) $(OBJ_DIR)/boot 
 	nasm src/boot/main.asm -f bin -o $(OBJ_DIR)/boot/main.o
 	nasm src/boot/entry.asm -f elf -o $(OBJ_DIR)/boot/entry.o
@@ -31,6 +30,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(MKDIR_P) $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(OBJ_DIR)/%_asm.o: $(SRC_DIR)/%.asm
+	nasm -f elf32 $< -o $@
 
 clean:
 	rm -rf $(OBJS) $(TARGET) $(KERNEL) $(OBJ_DIR)

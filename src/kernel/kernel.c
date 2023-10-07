@@ -14,7 +14,6 @@ void disable_cursor() {
   ioport_out(0x3D4, 0x0A);
   ioport_out(0x3D5, 0x20);
 }
-
 void init_idt() {
   // Address of the function keyboard_handler
   unsigned int kb_handler_offset = (unsigned long)keyboard_handler;
@@ -72,6 +71,7 @@ void handle_keyboard_interrupt() {
       printChar(c);
     else
      int2hex(keycode);
+
   }
 }
 
@@ -79,7 +79,7 @@ extern void main(){ // The main function call in entry.asm
   init_idt();
   kb_init();
   enable_interrupts();
-  disable_cursor();
+  //disable_cursor();
 
   printString("Welcome to NoderyOS\n");
 

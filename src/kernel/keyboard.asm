@@ -12,39 +12,39 @@ global enable_interrupts
 extern handle_keyboard_interrupt
 
 load_idt:
-	mov edx, [esp + 4]
-	lidt [edx]
-	ret
+  mov edx, [esp + 4]
+  lidt [edx]
+  ret
 
 enable_interrupts:
-	sti
-	ret
+  sti
+  ret
 
 keyboard_handler:
-	pushad
-	cld
-	call handle_keyboard_interrupt
-	popad
-	iretd
+  pushad
+  cld
+  call handle_keyboard_interrupt
+  popad
+  iretd
 
 ioport_in:
-	mov edx, [esp + 4]
-	in al, dx
-	ret
+  mov edx, [esp + 4]
+  in al, dx
+  ret
 
 ioport_out:
-	mov edx, [esp + 4]
-	mov eax, [esp + 8]
-	out dx, al
-	ret
+  mov edx, [esp + 4]
+  mov eax, [esp + 8]
+  out dx, al
+  ret
 
 inl:
-	mov edx, [esp + 4]
-	in eax, dx
-	ret
+  mov edx, [esp + 4]
+  in eax, dx
+  ret
 
 outl:
-	mov edx, [esp + 4]
-	mov eax, [esp + 8]
-	out dx, eax
-	ret
+  mov edx, [esp + 4]
+  mov eax, [esp + 8]
+  out dx, eax
+  ret

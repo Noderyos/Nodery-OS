@@ -9,7 +9,7 @@ OBJS += $(patsubst $(SRC_DIR)/%.asm, $(OBJ_DIR)/%_asm.o, $(ASMS))
 
 
 CC = gcc
-CFLAGS = -Wall -Iinclude -ffreestanding -m32 -fno-pie
+CFLAGS = -g -ggdb -Wall -Iinclude -ffreestanding -m32 -fno-pie
 
 KERNEL = $(OBJ_DIR)/full_kernel.bin
 TARGET = kernel.bin

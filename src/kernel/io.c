@@ -14,13 +14,48 @@ extern void ioport_out(unsigned short port, unsigned char data);
 int curW;
 int curH;
 
+void print(char* format, ...){
+  register int i asm("ebp");
+  unsigned int *args = (unsigned int *)(i + 8);
+  char itoa_buf[64];
+	int form = 0;
+  int index = 1;
+  for(char c = *format++; c != 0; c = *format++){
+		if(form){
+			form = 0;
+			if(c == 'd'){
+				_itoa(args[index++], itoa_buf, 10);
+				int i = 0;
+				while (itoa_buf[i])
+					printChar(itoa_buf[i++]);
+				
+			}else if(c == 'x'){
+				_itoa(args[index++], itoa_buf, 16);
+				int i = 0;
+				while (itoa_buf[i])
+					printChar(itoa_buf[i++]);
+			}else if(c == 's'){
+        char *str = (char *)args[index++];
+        int j = 0;
+        while(str[j])
+          printChar(str[j++]);
+      }
+		}else{
+			if(c == '%')
+				form = 1;
+			else
+				printChar(c);
+		}
+	}
+}
+
 
 void updateCursor(){
 	unsigned short pos = (curH * SCREEN_WIDTH + curW);
 	ioport_out(0x3D4, 0x0F);
-	ioport_out(0x3D5, (uint8_t) (pos & 0xFF));
+	ioport_out(0x3D5, (unsigned char) (pos & 0xFF));
 	ioport_out(0x3D4, 0x0E);
-	ioport_out(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+	ioport_out(0x3D5, (unsigned char) ((pos >> 8) & 0xFF));
 }
 
 void printChar(char c){

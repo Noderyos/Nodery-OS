@@ -3,6 +3,8 @@
 #include "kernel/keymap.h"
 #include "kernel/keyboard.h" 
 
+char itoa_buf[128];
+
 #define COMMAND_BUFFER_SIZE 100
 
 struct IDT_entry IDT[IDT_SIZE];
@@ -69,8 +71,6 @@ void handle_keyboard_interrupt() {
     char c = keymap[keycode];
     if(c)
       printChar(c);
-    else
-     int2hex(keycode);
 
   }
 }
@@ -80,8 +80,7 @@ extern void main(){ // The main function call in entry.asm
   kb_init();
   enable_interrupts();
   //disable_cursor();
-
-  printString("Welcome to NoderyOS\n");
-
+  print("Hello %d salut %x %s\n", (unsigned int)0x1337, (unsigned int)0x69, "Hello world");
+  
   while(1);
 }

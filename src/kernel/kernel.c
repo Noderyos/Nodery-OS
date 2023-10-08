@@ -80,7 +80,7 @@ extern void main(){ // The main function call in entry.asm
   kb_init();
   enable_interrupts();
   //disable_cursor();
-  print("Hello %d salut %x %s\n", (unsigned int)0x1337, (unsigned int)0x69, "Hello world");
+  print("Welcome to NoderyOS\nDecimal : %d\nHex : %x\nString : %s\n", 69, 0x1337, "Hello world");
   
   while(1);
 }

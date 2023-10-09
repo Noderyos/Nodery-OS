@@ -2,8 +2,14 @@
 #include "kernel/utils.h"
 #include "kernel/keymap.h"
 #include "kernel/keyboard.h" 
+#include "types.h"
+
+
+extern void ata_lba_read();
 
 char itoa_buf[128];
+
+char buf[512];
 
 #define COMMAND_BUFFER_SIZE 100
 
@@ -81,6 +87,8 @@ extern void main(){ // The main function call in entry.asm
   enable_interrupts();
   //disable_cursor();
   print("Welcome to NoderyOS\nDecimal : %d\nHex : %x\nString : %s\n", 69, 0x1337, "Hello world");
-  
+  ata_lba_read();
+  __asm__("nop;nop;nop;nop;nop");
+  print("AA %x %x AA", buf[254], buf[255]);
   while(1);
 }

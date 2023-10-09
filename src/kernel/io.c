@@ -9,7 +9,6 @@
 // [Second char ascii code][Second char color code]
 // [Third char ascii code][Third char color code]
 
-extern void ioport_out(unsigned short port, unsigned char data);
 
 int curW;
 int curH;

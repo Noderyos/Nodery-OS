@@ -31,6 +31,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%_asm.o: $(SRC_DIR)/%.asm
+	@$(MKDIR_P) $(dir $@) 
 	nasm -f elf32 $< -o $@
 
 clean:

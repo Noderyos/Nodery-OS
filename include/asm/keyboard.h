@@ -2,6 +2,7 @@
 #define KEYBOARD_H
 
 #include "types.h"
+#include "asm/ports.h"
 
 #define IDT_SIZE 256
 #define KERNEL_CODE_SEGMENT_OFFSET 0x8
@@ -29,12 +30,6 @@ struct IDT_entry {
 
 extern void load_gdt();
 extern void keyboard_handler();
-extern char ioport_in(u16 port);
-extern void ioport_out(u16 port, u8 data);
-
-extern void inl(u16 port);
-extern void outl(u16 port, u32 data);
-
 extern void load_idt(struct IDT_pointer* idt_address);
 extern void enable_interrupts();
 

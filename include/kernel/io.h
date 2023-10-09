@@ -3,6 +3,7 @@
 
 
 #include "kernel/utils.h"
+#include "asm/ports.h"
 
 void print(char* format, ...);
 

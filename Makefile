@@ -9,7 +9,7 @@ OBJS += $(patsubst $(SRC_DIR)/%.asm, $(OBJ_DIR)/%_asm.o, $(ASMS))
 
 
 CC = gcc
-CFLAGS = -g -ggdb -Wall -Iinclude -ffreestanding -m32 -fno-pie
+CFLAGS = -Wall -Iinclude -ffreestanding -m32 -fno-pie -fno-stack-protector
 
 KERNEL = $(OBJ_DIR)/full_kernel.bin
 TARGET = kernel.bin
@@ -17,7 +17,7 @@ TARGET = kernel.bin
 MKDIR_P = mkdir -p
 
 all: kernel boot
-	bin/i386-elf-ld -T scripts/linker.ld -o $(KERNEL) -Ttext 0x1000 $(OBJ_DIR)/boot/entry.o $(OBJS) --oformat binary
+	ld -m elf_i386 -T scripts/linker.ld -o $(KERNEL) -Ttext 0x1000 $(OBJ_DIR)/boot/entry.o $(OBJS) --oformat binary
 	cat $(OBJ_DIR)/boot/main.o $(KERNEL) > $(TARGET) 
 
 kernel: $(OBJS)

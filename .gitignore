@@ -2,3 +2,4 @@ obj/*
 obj
 kernel.bin
 compile_flags.txt
+.gdb_history

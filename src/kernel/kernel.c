@@ -1,10 +1,7 @@
 #include "kernel/io.h"
-#include "kernel/utils.h"
 #include "kernel/keymap.h"
 #include "asm/keyboard.h" 
 #include "asm/ports.h"
-#include "asm/ata.h"
-#include "types.h"
 
 u8 shift = 0;
 
@@ -25,21 +22,22 @@ void handle_keyboard_interrupt() {
         shift = 1;
         return;
       }
-      if(keycode == 0x0e){
+      if(keycode == 0x0e && cmd_index > 0){
         cmd_index--;
-        cmd[cmd_index] = 0
+        cmd[cmd_index] = 0;
         return;
       }
 
-
       char c;
-      print("%x", keycode);
       if(shift)
         c = keymap_maj[keycode];
       else
         c = keymap[keycode];
-      if(c)
-        printChar(c);
+      if(c && cmd_index < 100){
+          printChar(c);
+          cmd[cmd_index] = c;
+          cmd_index++;
+      }
     }
   }
 }

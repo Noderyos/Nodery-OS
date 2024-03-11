@@ -36,4 +36,4 @@ $(OBJ_DIR)/%_asm.o: $(SRC_DIR)/%.asm
 
 clean:
 	rm -rf $(OBJS) $(TARGET) $(KERNEL) $(OBJ_DIR)
-	
+

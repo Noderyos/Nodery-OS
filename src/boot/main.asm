@@ -1,6 +1,8 @@
 [org 0x7c00]
-KERNEL_LOCATION equ 0x1000
 
+UPPER_MEMORY equ 0x800
+EXTENDED_MEMORY equ 0x802
+KERNEL_LOCATION equ 0x1000
 
 mov [BOOT_DISK], dl
 
@@ -10,6 +12,13 @@ mov es, ax
 mov ds, ax
 mov bp, 0x8000
 mov sp, bp
+
+xor cx, cx
+xor dx, dx
+mov ax, 0xE801
+int 0x15
+mov word[UPPER_MEMORY], cx
+mov word[EXTENDED_MEMORY], dx
 
 mov bx, KERNEL_LOCATION
 mov dh, 2

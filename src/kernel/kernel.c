@@ -47,6 +47,10 @@ extern void main(){ // The main function call in entry.asm
   kb_init();
   enable_interrupts();
   //disable_cursor();
+  u16 low_memory = 1024;                   // Assuming computer have at least 1Mb of RAM (Without 1Mb, BIOS isn't stable)
+  u16 upper_memory = *((u16*)0x800);       // kB between 1Mb and 16Mb
+  u16 extended_memory = *((u16*)0x802);    // 64kB block over 16Mb
+  print("Memory available : %dKb\n", low_memory + upper_memory + extended_memory * 64);
   print("Welcome to NoderyOS\nDecimal : %d\nHex : %x\nString : %s\n", 69, 0x1337, "Hello world");
   while(1);
 }

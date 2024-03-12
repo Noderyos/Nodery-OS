@@ -1,8 +1,6 @@
-obj/*
 obj
 kernel.bin
 compile_flags.txt
 .gdb_history
 peda*
-.idea/*
 .idea

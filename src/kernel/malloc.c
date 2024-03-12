@@ -26,6 +26,36 @@ int find_empty_entry(){
     return -1;
 }
 
+
+int find_entry(void *ptr){
+    for (int i = 0; i < MALLOC_ENTRY_COUNT; ++i) {
+        if(malloc_entries[i].start == ptr)
+            return i;
+    }
+    return -1;
+}
+
+void *realloc(void *ptr, unsigned int new_size){
+    int entry_idx = find_entry(ptr);
+    if(entry_idx == -1)
+        return 0;
+
+    unsigned int size = malloc_entries[entry_idx].end - malloc_entries[entry_idx].start + 1;
+    if(size > new_size)
+        return 0;
+
+    void *new_ptr = malloc(new_size);
+    if(!new_ptr)
+        return 0;
+
+    for (int i = 0; i < size; ++i)
+        *((unsigned char*)new_ptr + i) = *((unsigned char*)ptr + i);
+
+    free(ptr);
+    return new_ptr;
+}
+
+
 int find_up_nearest(void *ptr){
     void *min_addr = &malloc_blob[BLOB_SIZE];
     int min = -1;
@@ -46,7 +76,7 @@ void *malloc(unsigned int size){
 
 next: // Until we have found the right place
     int near = find_up_nearest(cursor);
-    if(near <0){
+    if(near < 0){
         if(cursor+size <= (void*)&malloc_blob[BLOB_SIZE]) goto malloc;
         else return 0;
     }else{

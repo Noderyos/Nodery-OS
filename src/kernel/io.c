@@ -12,6 +12,21 @@
 
 int curW;
 int curH;
+int color = 0x0F;
+
+void setForeground(term_color fg){
+  color = (color & 0xF0) + fg;
+}
+
+void setBackground(term_color bg){
+  color = (color & 0x0F) + (bg<<4);
+}
+
+void setColor(term_color bg, term_color fg){
+  setBackground(bg);
+  setForeground(fg);
+}
+
 
 void print(char* format, ...){
   register int i asm("ebp");
@@ -63,22 +78,12 @@ void printChar(char c){
     return;
   }
   *(char*)(VIDEO_ADDRESS + (curH*SCREEN_WIDTH*2) + (curW*2)) = c;
+  *(char*)(VIDEO_ADDRESS + (curH*SCREEN_WIDTH*2) + (curW*2) + 1) = color;
   curW++;
   if(curW >= SCREEN_WIDTH){
     printNewLine();
   }
   updateCursor();
-  return;
-}
-
-void printString(char* string){
-  for (int i = 0; 1; i++) {
-    char character = (int) string[i];
-    if (character == '\0') {
-      return;
-    }
-    printChar(character);
-  }
   return;
 }
 

@@ -55,6 +55,7 @@ extern void main(){ // The main function call in entry.asm
   
   print("Memory available : %dKb\n", available_memory / 1024);
   if(init_malloc(available_memory) < 0){
+    setForeground(RED);
     print("[!] Malloc init error\n");
     goto loop;
   }

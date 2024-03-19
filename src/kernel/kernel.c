@@ -59,6 +59,4 @@ extern void main(){ // The main function call in entry.asm
   }
 
   print(0xFFFFFF,"Welcome to NoderyOS\nDecimal : %d\nHex : %x\nString : %s\n", 69, 0x1337, "Hello world");
-loop:
-  goto loop;
 }

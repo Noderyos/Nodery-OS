@@ -23,6 +23,9 @@ all: kernel boot
 	@echo "Generating final file"
 	@cat $(OBJ_DIR)/boot/main.o $(KERNEL) > $(TARGET) 
 
+run: all
+	qemu-system-x86_64 -m 512M -hda $(TARGET)
+
 kernel: $(OBJS)
 
 boot:

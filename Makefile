@@ -9,7 +9,7 @@ OBJS += $(patsubst $(SRC_DIR)/%.asm,$(OBJ_DIR)/%_asm.o, $(ASMS))
 
 
 CC = gcc
-CFLAGS = -Wall -Iinclude -ffreestanding -m32 -fno-pie -fno-stack-protector
+CFLAGS = -Wall -Wextra -Iinclude -ffreestanding -m32 -fno-pie -fno-stack-protector
 
 KERNEL = $(OBJ_DIR)/full_kernel.bin
 TARGET = os.img

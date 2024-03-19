@@ -4,7 +4,7 @@
 void _itoa(int integer, char* result, int base) {
   int num_digits = 0;
   int val = 0;
-  while (integer > 0) {
+  while ((unsigned int)integer > 0) {
     val = integer % base;
     if (val < 10) {
       result[num_digits] = val + '0';

@@ -34,9 +34,17 @@ mov cl, 0x02
 mov dl, [BOOT_DISK]
 int 0x13
 
-; Setup Video Mode (80x25 16 fore/8 back)
-mov ah, 0x0
-mov al, 0x3
+; Setup Video Mode (800x600 24bit color)
+mov ax, 0x4f02
+mov bx, 0x115
+int 0x10
+
+; Retrieving VESA config to 0x7e00
+mov cx, 0x115
+mov ax, 0x0000
+mov es, ax
+mov di, 0x7e00
+mov ax, 0x4F01
 int 0x10
 
 ; Switch to protected mode

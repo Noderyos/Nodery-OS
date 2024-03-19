@@ -1,11 +1,11 @@
 #include "kernel/malloc.h"
+#include "kernel/io.h"
 
 unsigned int BLOB_SIZE = 0;
 malloc_entry *malloc_entries = 0;
 unsigned char *malloc_blob = 0;
 
 int init_malloc(unsigned int mem_size){
-
     unsigned int start_addr = 0x01000000;
 
     if(mem_size < start_addr + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT)
@@ -13,7 +13,7 @@ int init_malloc(unsigned int mem_size){
     malloc_entries = (malloc_entry *)start_addr;
     malloc_blob = (u8*)(start_addr + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT);
     BLOB_SIZE = mem_size - start_addr - sizeof(malloc_entry) * MALLOC_ENTRY_COUNT;
-    print("Malloc entries at 0x%x array at 0x%x of size %dKb\n", malloc_entries, malloc_blob, BLOB_SIZE/1024);
+    print(0xFFFFFF, "Malloc entries at 0x%x array at 0x%x of size %dKb\n", malloc_entries, malloc_blob, BLOB_SIZE/1024);
 
     return 0;
 }
@@ -74,8 +74,9 @@ void *malloc(unsigned int size){
 
     void *cursor = malloc_blob;
 
+    int near;
 next: // Until we have found the right place
-    int near = find_up_nearest(cursor);
+    near = find_up_nearest(cursor);
     if(near < 0){
         if(cursor+size <= (void*)&malloc_blob[BLOB_SIZE]) goto malloc;
         else return 0;

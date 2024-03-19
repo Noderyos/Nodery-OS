@@ -7,7 +7,7 @@
 
 #define FONT_COLS 5
 #define FONT_ROWS 7
-#define FONT_SIZE 3
+#define FONT_SIZE 2
 
 int x = 10;
 int y = 10;

@@ -75,7 +75,7 @@ void *malloc(unsigned int size){
     void *cursor = malloc_blob;
 
     int near;
-next: // Until we have found the right place
+next: // Until we found the right place
     near = find_up_nearest(cursor);
     if(near < 0){
         if(cursor+size <= (void*)&malloc_blob[BLOB_SIZE]) goto malloc;
@@ -90,7 +90,7 @@ next: // Until we have found the right place
         }
     }
 
-malloc: // Once we have found the right place
+malloc: // Once we found the right place
     malloc_entries[entry].start = cursor;
     malloc_entries[entry].end = cursor + size - 1;
     return cursor;

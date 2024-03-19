@@ -1,5 +1,5 @@
 obj
-kernel.bin
+os.img
 compile_flags.txt
 .gdb_history
 peda*

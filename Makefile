@@ -12,16 +12,25 @@ CC = gcc
 CFLAGS = -Wall -Iinclude -ffreestanding -m32 -fno-pie -fno-stack-protector
 
 KERNEL = $(OBJ_DIR)/full_kernel.bin
-TARGET = kernel.bin
+TARGET = os.img
 
 MKDIR_P = mkdir -p
 
 all: kernel boot
 	@echo "Linking kernel"
 	@ld -m elf_i386 -T scripts/linker.ld -o $(KERNEL) $(OBJ_DIR)/boot/entry.o $(OBJS) --oformat binary
-	
-	@echo "Generating final file"
-	@cat $(OBJ_DIR)/boot/main.o $(KERNEL) > $(TARGET) 
+
+	@echo "Creating disk file"
+	@dd if=/dev/zero of=$(TARGET) bs=1024 count=32768 > /dev/null
+
+	@echo "Formating disk file"
+	@bash scripts/format.sh $(TARGET)
+
+	@echo "Writing bootloader"
+	@dd conv=notrunc if=obj/boot/main.o of=$(TARGET) > /dev/null
+
+	@echo "Writing kernel"
+	@dd conv=notrunc if=obj/full_kernel.bin of=$(TARGET) bs=1 seek=512 > /dev/null
 
 run: all
 	qemu-system-x86_64 -m 512M -hda $(TARGET)
@@ -48,4 +57,3 @@ $(OBJ_DIR)/%_asm.o: $(SRC_DIR)/%.asm
 
 clean:
 	rm -rf $(OBJS) $(TARGET) $(KERNEL) $(OBJ_DIR)
-

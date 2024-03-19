@@ -1,12 +1,13 @@
 #include "kernel/malloc.h"
 #include "kernel/io.h"
+#include "types.h"
 
-unsigned int BLOB_SIZE = 0;
+u32 BLOB_SIZE = 0;
 malloc_entry *malloc_entries = 0;
 unsigned char *malloc_blob = 0;
 
-int init_malloc(unsigned int mem_size){
-    unsigned int start_addr = 0x01000000;
+int init_malloc(u32 mem_size){
+    u32 start_addr = 0x01000000;
 
     if(mem_size < start_addr + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT)
         return -1;
@@ -35,12 +36,12 @@ int find_entry(void *ptr){
     return -1;
 }
 
-void *realloc(void *ptr, unsigned int new_size){
+void *realloc(void *ptr, u32 new_size){
     int entry_idx = find_entry(ptr);
     if(entry_idx == -1)
         return 0;
 
-    unsigned int size = malloc_entries[entry_idx].end - malloc_entries[entry_idx].start + 1;
+    u32 size = malloc_entries[entry_idx].end - malloc_entries[entry_idx].start + 1;
     if(size > new_size)
         return 0;
 
@@ -48,7 +49,7 @@ void *realloc(void *ptr, unsigned int new_size){
     if(!new_ptr)
         return 0;
 
-    for (int i = 0; i < size; ++i)
+    for (u32 i = 0; i < size; ++i)
         *((unsigned char*)new_ptr + i) = *((unsigned char*)ptr + i);
 
     free(ptr);
@@ -68,7 +69,7 @@ int find_up_nearest(void *ptr){
     return min;
 }
 
-void *malloc(unsigned int size){
+void *malloc(u32 size){
     int entry = find_empty_entry();
     if(entry < 0) return 0;
 
@@ -81,7 +82,7 @@ next: // Until we found the right place
         if(cursor+size <= (void*)&malloc_blob[BLOB_SIZE]) goto malloc;
         else return 0;
     }else{
-        long diff = malloc_entries[near].start - cursor;
+        u32 diff = malloc_entries[near].start - cursor;
         if(diff < size){
             cursor = malloc_entries[near].end + 1;
             goto next;

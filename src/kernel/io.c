@@ -13,7 +13,12 @@ int x = 10;
 int y = 10;
 
 vbe_mode_info_structure *vbe = (void *)0x7E00;
-
+void putpixel(unsigned char* screen, int x,int y, int color) {
+    unsigned int where = (y*800 + x)*3;
+    screen[where] = color & 255;              // BLUE
+    screen[where + 1] = (color >> 8) & 255;   // GREEN
+    screen[where + 2] = (color >> 16) & 255;  // RED
+}
 
 void print(u32 color, char* format, ...){
   register int i asm("ebp");

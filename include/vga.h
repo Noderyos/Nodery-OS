@@ -41,11 +41,8 @@ typedef struct {
     u8 reserved1[206];
 } __attribute__ ((packed)) vbe_mode_info_structure;
 
-static void putpixel(unsigned char* screen, int x,int y, int color) {
-    unsigned int where = (y*800 + x)*3;
-    screen[where] = color & 255;              // BLUE
-    screen[where + 1] = (color >> 8) & 255;   // GREEN
-    screen[where + 2] = (color >> 16) & 255;  // RED
-}
+extern vbe_mode_info_structure *vbe;
+
+void putpixel(unsigned char* screen, int x,int y, int color);
 
 #endif

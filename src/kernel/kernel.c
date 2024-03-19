@@ -7,7 +7,7 @@
 u8 shift = 0;
 
 u8 cmd[1024];
-u8 cmd_index = 0;
+u32 cmd_index = 0;
 
 void handle_keyboard_interrupt() {
   ioport_out(PIC1_COMMAND_PORT, 0x20);
@@ -59,8 +59,6 @@ extern void main(){ // The main function call in entry.asm
   }
 
   print(0xFFFFFF,"Welcome to NoderyOS\nDecimal : %d\nHex : %x\nString : %s\n", 69, 0x1337, "Hello world");
-
-  vbe_mode_info_structure *vbe = (void *)0x7E00;
 loop:
   goto loop;
 }

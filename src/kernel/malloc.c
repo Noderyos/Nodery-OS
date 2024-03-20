@@ -14,7 +14,7 @@ int init_malloc(u32 mem_size){
     malloc_entries = (malloc_entry *)start_addr;
     malloc_blob = (u8*)(start_addr + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT);
     BLOB_SIZE = mem_size - start_addr - sizeof(malloc_entry) * MALLOC_ENTRY_COUNT;
-    print(0xFFFFFF, "Malloc entries at 0x%x array at 0x%x of size %dKb\n", malloc_entries, malloc_blob, BLOB_SIZE/1024);
+    print(0x7F7F7F, "Malloc entries at 0x%x array at 0x%x of size %dKb\n", malloc_entries, malloc_blob, BLOB_SIZE/1024);
 
     return 0;
 }

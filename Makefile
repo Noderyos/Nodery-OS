@@ -16,15 +16,16 @@ TARGET = os.img
 
 MKDIR_P = mkdir -p
 
-all: kernel boot
-	@echo "Linking kernel"
-	@ld -m elf_i386 -T scripts/linker.ld -o $(KERNEL) $(OBJ_DIR)/boot/entry.o $(OBJS) --oformat binary
-
+$(TARGET):
 	@echo "Creating disk file"
 	@dd if=/dev/zero of=$(TARGET) bs=1024 count=32768 > /dev/null
 
 	@echo "Formating disk file"
 	@bash scripts/format.sh $(TARGET)
+
+all: kernel boot $(TARGET)
+	@echo "Linking kernel"
+	@ld -m elf_i386 -T scripts/linker.ld -o $(KERNEL) $(OBJ_DIR)/boot/entry.o $(OBJS) --oformat binary
 
 	@echo "Writing bootloader"
 	@dd conv=notrunc if=obj/boot/main.o of=$(TARGET) > /dev/null
@@ -33,7 +34,7 @@ all: kernel boot
 	@dd conv=notrunc if=obj/full_kernel.bin of=$(TARGET) bs=1 seek=512 > /dev/null
 
 run: all
-	qemu-system-x86_64 -m 512M -hda $(TARGET)
+	qemu-system-x86_64 -m 512M -hda $(TARGET) -s
 
 kernel: $(OBJS)
 

@@ -107,5 +107,5 @@ start_protected_mode:
   ; Run kernel
   jmp KERNEL_LOCATION
 
-times 510-($-$$) db 0
+times 442-($-$$) db 0
 dw 0xaa55

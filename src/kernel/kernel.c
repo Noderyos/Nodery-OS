@@ -3,7 +3,8 @@
 #include "asm/keyboard.h" 
 #include "asm/ports.h"
 #include "kernel/malloc.h"
-#include "vga.h"
+#include "fs.h"
+#include "string.h"
 u8 shift = 0;
 
 u8 cmd[1024];
@@ -35,13 +36,14 @@ void handle_keyboard_interrupt() {
       else
         c = keymap[keycode];
       if(c && cmd_index < 1024){
-          printChar(0x00E000, c);
-          cmd[cmd_index] = c;
-          cmd_index++;
+        printChar(0x00E000, c);
+        cmd[cmd_index] = c;
+        cmd_index++;
       }
     }
   }
 }
+#include "fs.h"
 
 extern void main(){ // The main function call in entry.asm
   init_idt();
@@ -52,11 +54,27 @@ extern void main(){ // The main function call in entry.asm
   u16 upper_memory = *((u16*)0x800);       // kB between 1Mb and 16Mb
   u16 extended_memory = *((u16*)0x802);    // 64kB block over 16Mb
   u32 available_memory = 1024*(low_memory + upper_memory + extended_memory * 64);
-  print(0xFFFFFF, "Memory available : %dKb\n", available_memory / 1024);
+  print(0x7F7F7F, "Memory available : %dKb\n", available_memory / 1024);
   if(init_malloc(available_memory) < 0){
-      print(0xFF0000, "[!] Malloc init error\n");
-      goto loop;
+    print(0xFF0000, "[!] Malloc init error\n");
+    return;
   }
-
+  if(init_fs(0) < 0){
+    print(0xFF0000, "[!] Partition init error\n");
+    return;
+  }
   print(0xFFFFFF,"Welcome to NoderyOS\nDecimal : %d\nHex : %x\nString : %s\n", 69, 0x1337, "Hello world");
+
+
+  print(0x00FF00, "File list :\n");
+  list_files();
+
+
+  char* fname = "HELLO.TXT";
+  char *data = read_file(fname);
+  if(data == 0){
+      print(0xFF0000, "\nCannot find '%s' on disk\n", fname);
+  }else{
+      print(0x00FF00, "\nContent of %s is '%s'\n", fname, data);
+  }
 }

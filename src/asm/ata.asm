@@ -1,9 +1,9 @@
 bits 32
 
-global ata_lba_read
-global ata_lba_write
+global _ata_lba_read
+global _ata_lba_write
 
-ata_lba_read:
+_ata_lba_read:
   mov eax, [esp + 4]   ; First sector
   mov cl, [esp + 8]    ; Sector count
   mov edi, [esp + 12]  ; Buffer
@@ -66,7 +66,7 @@ ata_lba_read:
   ret
 
 
-ata_lba_write:
+_ata_lba_write:
   mov eax, [esp + 4]   ; First sector 
   mov cl, [esp + 8]    ; Sector count
   mov edi, [esp + 12]  ; Buffer

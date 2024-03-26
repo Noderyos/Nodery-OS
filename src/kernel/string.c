@@ -37,4 +37,5 @@ char *strstr(char *str, char *sub){
             return str + i;
         }
     }
+    return 0;
 }

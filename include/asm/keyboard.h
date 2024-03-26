@@ -34,12 +34,8 @@ extern void load_idt(struct IDT_pointer* idt_address);
 extern void enable_interrupts();
 
 
-void disable_cursor();
-
 void init_idt();
-
 void kb_init();
-
 void handle_keyboard_interrupt();
 
 #endif

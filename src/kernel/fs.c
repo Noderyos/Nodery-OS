@@ -92,6 +92,10 @@ void *read_file(char *filename){
 
     char* ext = strstr(filename, ".");
 
+    if(ext == 0)
+        return 0;
+
+
     char *name = malloc(ext-filename);
     memcpy(name, filename, ext-filename);
     ext++;  // Move after '.'

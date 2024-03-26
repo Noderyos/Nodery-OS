@@ -2,10 +2,7 @@
 
 struct IDT_entry IDT[IDT_SIZE];
 
-void disable_cursor() {
-  ioport_out(0x3D4, 0x0A);
-  ioport_out(0x3D5, 0x20);
-}
+
 void init_idt() {
   // Address of the function keyboard_handler
   unsigned int kb_handler_offset = (unsigned long)keyboard_handler;

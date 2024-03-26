@@ -45,6 +45,8 @@ void print(u32 color, char* format, ...){
         int j = 0;
         while(str[j])
           printChar(color, str[j++]);
+      }else if(c == '%'){
+          printChar(color, c);
       }
     }else{
       if(c == '%')

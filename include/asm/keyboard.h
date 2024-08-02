@@ -16,16 +16,16 @@
 
 
 struct IDT_pointer {
-        u16 limit;
-        u32 base;
+    u16 limit;
+    u32 base;
 } __attribute__((packed));
 
 struct IDT_entry {
-        u16 offset_lowerbits;
-        u16 selector;
-        u8 zero;
-        u8 type_attr;
-        u16 offset_upperbits;
+    u16 offset_lowerbits;
+    u16 selector;
+    u8 zero;
+    u8 type_attr;
+    u16 offset_upperbits;
 } __attribute__((packed));
 
 extern void load_gdt();

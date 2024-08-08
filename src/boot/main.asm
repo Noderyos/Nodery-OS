@@ -108,4 +108,3 @@ start_protected_mode:
     jmp KERNEL_LOCATION
 
 times 442-($-$$) db 0
-dw 0xaa55

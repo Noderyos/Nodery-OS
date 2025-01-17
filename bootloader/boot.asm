@@ -2,6 +2,7 @@
 [org 0x7c00]
 
 BOOT_DISK equ 0x800
+KERNEL_LOCATION equ 0x1000
 
 mov [BOOT_DISK], dl
 
@@ -20,7 +21,7 @@ mov al, 0x1 ; Sector count
 mov ch, 0x0
 mov dh, 0x0
 mov cl, 0x2
-mov bx, 0x7e00 ; Address
+mov bx, KERNEL_LOCATION ; Address
 mov dl, [BOOT_DISK]
 int 13h
 
@@ -43,7 +44,7 @@ read_error:
     call error
     jmp $
 
-%include "print.asm"
+%include "bootloader/print.asm"
 
 disk_error: db "Cannot read disk", 13, 10, 0
 
@@ -83,11 +84,9 @@ start_protected_mode:
     mov ebp, 0x90000
     mov esp, ebp
 
-    mov byte[0xb8000], 'N'
-    mov byte[0xb8001], 0x6
+    jmp KERNEL_LOCATION
 
-    jmp $
+jmp $
 
 times 510-($-$$) db 0
 dw 0xaa55
-times 512 db 0

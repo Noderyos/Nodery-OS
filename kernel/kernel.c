@@ -1,5 +1,7 @@
+#include "io.h"
 
-void main(void) {
-    *((unsigned char*)0xB8000) = 'N';
-    *((unsigned char*)0xB8001) = 0xf;
+int main(void) {    
+    printString("Welcome to\n");
+    setColor(YELLOW);
+    printString("NoderyOS");
 }

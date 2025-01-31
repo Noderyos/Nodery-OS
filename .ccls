@@ -1,0 +1,4 @@
+%gcc
+-Wall
+-Wextra
+-Iinclude

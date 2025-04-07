@@ -4,7 +4,15 @@
 BOOT_DISK equ 0x800
 KERNEL_LOCATION equ 0x1000
 
+UPPER_MEM equ 0x802
+EXTENDED_MEM equ 0x804
+
 mov [BOOT_DISK], dl
+
+mov ax, 0xE801
+int 15h
+mov word[UPPER_MEM], cx
+mov word[EXTENDED_MEM], dx
 
 ; Setup stack
 mov sp, 0x4000

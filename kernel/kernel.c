@@ -3,6 +3,7 @@
 #include "ps2.h"
 #include "ports.h"
 #include "keymap.h"
+#include "malloc.h"
 
 #define MAX_CMD 1024
 
@@ -46,6 +47,17 @@ int main(void) {
     init_idt();
     kb_init();
     enable_interrupts();
+
+    u16 low_memory = 1024;
+    u16 upper_memory = *((u16*)0x802);
+    u16 extended_memory = *((u16*)0x804);
+    u32 available_memory = 1024*(low_memory + upper_memory + extended_memory * 64);
+    printf("Memory available : %dKb\n", available_memory / 1024);
+    if(init_malloc(available_memory) < 0){
+        setColor(RED);
+        puts("Malloc init error");
+        return 0;
+    }
 
     puts("Welcome to");
     setColor(YELLOW);

@@ -1,8 +1,14 @@
 #include "pic.h"
 #include "ps2.h"
 #include "ports.h"
+#include "io.h"
 
 struct IDT_entry IDT[256];
+
+void int_handle() {
+    puts("\n\nOH NO AN EXCEPTION\n\n");
+    while (1);
+}
 
 void init_idt() {
     IDT[0x21].segment = 8;
@@ -10,6 +16,14 @@ void init_idt() {
     IDT[0x21].type = 0b10001110;
     IDT[0x21].offset_lower = (u32)keyboard_handler & 0xFFFF;
     IDT[0x21].offset_upper = ((u32)keyboard_handler & 0xFFFF0000) >> 16;
+
+    for(int i = 0; i < 0x16; i++) {
+        IDT[i].segment = 8;
+        IDT[i].zero = 0;
+        IDT[i].type = 0b10001110;
+        IDT[i].offset_lower = (u32)int_handler & 0xFFFF;
+        IDT[i].offset_upper = ((u32)int_handler & 0xFFFF0000) >> 16;
+    }
 
     // Restart PICs
     outb(PIC1_COMMAND, 0x11); 

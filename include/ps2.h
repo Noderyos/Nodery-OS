@@ -4,6 +4,7 @@
 #include "types.h"
 
 extern void keyboard_handler();
+extern void int_handler();
 
 void kb_init();
 void handle_keyboard();

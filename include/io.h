@@ -25,7 +25,7 @@ typedef enum {
 } TermColor;
 
 void setColor(TermColor color);
-void printChar(char c);
-void printString(char *s);
-
+int putchar(int c);
+int puts(const char *s);
+void backspace();
 #endif

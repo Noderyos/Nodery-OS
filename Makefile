@@ -9,7 +9,7 @@ all: bootloader/boot.asm kernel/entry.asm kernel/kernel.c
 	i386-elf-gcc $(CFLAGS) -c -o obj/kernel.o kernel/kernel.c -nolibc -nostdlib
 	i386-elf-gcc $(CFLAGS) -c -o obj/io.o kernel/io.c -nolibc -nostdlib
 	i386-elf-gcc $(CFLAGS) -c -o obj/ps2.o kernel/ps2.c -nolibc -nostdlib
-	i386-elf-ld -T linker.ld -o obj/kernel.bin obj/entry.o obj/kernel.o obj/io.o obj/ps2.o obj/ports.o --oformat binary
+	i386-elf-ld -T linker.ld -o obj/kernel.bin obj/entry.o obj/kernel.o obj/io.o obj/ps2.o obj/ports.o --oformat binary -Map=layout.map
 	cat obj/boot obj/kernel.bin > os.bin
 	dd if=/dev/zero of=os.bin bs=1k count=64 oflag=append conv=notrunc 
 debug: all
@@ -19,4 +19,4 @@ run: all
 	qemu-system-i386 -m 512M -hda os.bin
 
 clean:
-	rm -fr obj os.bin
+	rm -fr obj os.bin layout.map

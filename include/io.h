@@ -28,4 +28,6 @@ void setColor(TermColor color);
 int putchar(int c);
 int puts(const char *s);
 void backspace();
+
+int printf(const char *format, ...);
 #endif

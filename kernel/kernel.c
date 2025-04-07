@@ -28,7 +28,7 @@ void handle_keyboard() {
         else if(keycode == ENTER) {
             putchar('\n');
             cmd_len = 0;
-            puts("Unknown command (ono)");
+            printf("Unknown command '%s' (ono)\n", cmd);
             for(int i = 0; i < MAX_CMD; i++) cmd[i] = 0;
         }
         else if (keycode < 128) {

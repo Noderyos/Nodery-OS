@@ -1,9 +1,10 @@
-#include "io.h"
-#include "pic.h"
-#include "ps2.h"
-#include "ports.h"
-#include "keymap.h"
+#include "sys/pic.h"
+#include "sys/ps2.h"
+#include "sys/ports.h"
+#include "sys/keymap.h"
 #include "malloc.h"
+#include "sys/io.h"
+#include "io.h"
 
 #define MAX_CMD 1024
 

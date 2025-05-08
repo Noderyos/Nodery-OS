@@ -58,7 +58,7 @@ void *realloc(void *ptr, u32 new_size){
 
 
 int find_up_nearest(void *ptr){
-    void *min_addr = &malloc_blob[blob_size];
+    void *min_addr = malloc_blob + blob_size;
     int min = -1;
     for (int i = 0; i < MALLOC_ENTRY_COUNT; ++i) {
         if(malloc_entries[i].start >= ptr && malloc_entries[i].start < min_addr){
@@ -79,7 +79,7 @@ void *malloc(u32 size){
 next:
     near = find_up_nearest(cursor);
     if(near < 0){
-        if(cursor+size <= (void*)&malloc_blob[blob_size]) goto malloc;
+        if(cursor+size <= malloc_blob + blob_size) goto malloc;
         else return 0;
     }else{
         u32 diff = malloc_entries[near].start - cursor;

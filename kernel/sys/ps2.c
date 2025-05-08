@@ -1,6 +1,6 @@
-#include "pic.h"
-#include "ps2.h"
-#include "ports.h"
+#include "sys/pic.h"
+#include "sys/ps2.h"
+#include "sys/ports.h"
 #include "io.h"
 
 struct IDT_entry IDT[256];

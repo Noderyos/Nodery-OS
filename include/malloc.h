@@ -1,9 +1,11 @@
 #ifndef MALLOC_H
 #define MALLOC_H
 
+#include "types.h"
+
 typedef struct {
     void *start;
-    void *end;
+    u32 size;
 }malloc_entry;
 
 int init_malloc(unsigned int mem_size);

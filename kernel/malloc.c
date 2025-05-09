@@ -13,7 +13,7 @@ int init_malloc(u32 mem_size){
     if(mem_size < START_ADDR + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT)
         return -1;
     malloc_entries = (malloc_entry *)START_ADDR;
-    malloc_blob = malloc_entries + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT;
+    malloc_blob = (void*)malloc_entries + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT;
     blob_size = (void*)mem_size - malloc_blob;
     printf("Malloc entries at 0x%x array at 0x%x of size %dKb\n", malloc_entries, malloc_blob, blob_size/1024);
 
@@ -46,11 +46,11 @@ void *realloc(void *ptr, u32 new_size){
     if(!new_ptr)
         return 0;
 
-    u32 old_size = malloc_entries[entry].end - malloc_entries[entry].start + 1;
+    u32 old_size = malloc_entries[entry].size;
     u32 size = old_size < new_size ? old_size : new_size;
 
     for (u32 i = 0; i < size; ++i)
-        *((unsigned char*)new_ptr + i) = *((unsigned char*)ptr + i);
+        *((u8*)new_ptr + i) = *((u8*)ptr + i);
 
     free(ptr);
     return new_ptr;
@@ -76,24 +76,16 @@ void *malloc(u32 size){
     void *cursor = malloc_blob;
 
     int near;
-next:
-    near = find_up_nearest(cursor);
-    if(near < 0){
-        if(cursor+size <= malloc_blob + blob_size) goto malloc;
-        else return 0;
-    }else{
-        u32 diff = malloc_entries[near].start - cursor;
-        if(diff < size){
-            cursor = malloc_entries[near].end + 1;
-            goto next;
-        }else{
-            goto malloc;
-        }
-    }
+    while ((near = find_up_nearest(cursor)) >= 0                 // Mem allocated after
+            && (u32)(malloc_entries[near].start - cursor) < size // and not enough space
+    ) cursor = malloc_entries[near].start + malloc_entries[near].size;
 
-malloc:
+    // No memory allocated after and not enough space
+    if (near < 0 && cursor + size > malloc_blob + blob_size) return 0;
+
+
     malloc_entries[entry].start = cursor;
-    malloc_entries[entry].end = cursor + size - 1;
+    malloc_entries[entry].size = size;
     return cursor;
 }
 
@@ -101,7 +93,7 @@ int free(void *ptr) {
     for (int i = 0; i < MALLOC_ENTRY_COUNT; ++i) {
         if(malloc_entries[i].start == ptr){
             malloc_entries[i].start = 0;
-            malloc_entries[i].end = 0;
+            malloc_entries[i].size = 0;
             return 0;
         }
     }

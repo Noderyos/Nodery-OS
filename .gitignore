@@ -1,3 +1,5 @@
+toolchain
 obj
 os.bin
+part.bin
 layout.map

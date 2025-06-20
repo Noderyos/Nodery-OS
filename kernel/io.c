@@ -6,6 +6,12 @@
 #define va_start(ap, last) ((ap) = ((void*)&(last))+sizeof(last))
 #define va_arg(ap, type) (*({type* tmp = ap;(ap)+=sizeof(void*);tmp;}))
 
+
+void serialString(u16 port, char *str) {
+    while(*str)
+        writeSerial(port, *str++);
+}
+
 void _itoa(u32 value, char *buf, u32 base) {
     int idx = 0;
     while (value > 0) {
@@ -42,6 +48,9 @@ int printf(const char *format, ...) {
                 putchar('%');
             } else {
                 switch (*format) {
+                    case 'c':
+                        putchar(va_arg(args, char));
+                        break;
                     case 'd':
                         _itoa(va_arg(args, int), buf, 10);
                         j = 0;

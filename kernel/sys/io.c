@@ -8,6 +8,36 @@
 
 #define SCR_AT(x, y, i) (*(char *)((char*)VIDEO_BUFFER + ((y)*SCR_WIDTH+(x))*2+(i)))
 
+
+u16 *coms = (u16*)0x400;
+u16 *lpts = (u16*)0x408;
+
+
+int initSerial(u16 port) {
+    outb(port + 1, 0x00);
+    outb(port + 3, 0x80);
+    outb(port + 3, 0x03);
+    outb(port + 2, 0xC7);
+    outb(port + 4, 0x0B);
+    outb(port + 4, 0x1E);
+    outb(port + 0, 0xAE);
+
+    if(inb(port + 0) != 0xAE) {
+        return 1;
+    }
+    outb(port + 4, 0x0F); 
+    return 0;
+}
+
+void writeSerial(u16 port, u8 c) {
+    outb(port, c);
+}
+
+u8 readSerial(u16 port) {
+    return inb(port);
+}
+
+
 int scr_x = 0;
 int scr_y = 0;
 TermColor color = WHITE;

@@ -5,6 +5,12 @@
 #include "malloc.h"
 #include "sys/io.h"
 #include "io.h"
+#include "sys/lba.h"
+#include "mbr.h"
+#include "fat.h"
+#include "string.h"
+
+struct mbr *mbr = (void *)0x7c00;
 
 #define MAX_CMD 1024
 
@@ -60,7 +66,41 @@ int main(void) {
         return 0;
     }
 
+    if(initSerial(coms[0])) {
+        printf("ERROR : Failed to initialize serial port");
+    }
+
     puts("Welcome to");
     setColor(YELLOW);
     puts("NoderyOS");
+    setColor(WHITE);
+
+    if (init_fs(mbr->parts[0].lba_start) < 0) {
+        setColor(RED);
+        printf("Cannot init FS\n");
+        return 0;
+    }
+
+    FILE *f = fopen("HELLO.TXT", "r");
+    if (!f) {
+        printf("Cannot open file\n");
+        return 0;
+    }
+
+    char buf[32];
+    u32 i = fread(buf, 1, 32, f);
+    printf("%d '%s'\n", i, buf);
+    memset(buf, 0, 32);
+    fseek(f, 0, SEEK_SET);
+    
+    char *nod = "Noderyos";
+    fwrite(nod, 1, strlen(nod), f);
+    fseek(f, 0, SEEK_SET);
+    i = fread(buf, 1, 32, f);
+    printf("%d '%s'\n", i, buf);
+
+    if(initSerial(coms[0])) {
+        printf("ERROR : Failed to initialize serial port");
+    }
+
 }

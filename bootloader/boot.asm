@@ -25,7 +25,7 @@ int 10h
 
 ; Read disk
 mov ah, 0x2
-mov al, 0x10 ; Sector count
+mov al, 0x20 ; Sector count
 mov ch, 0x0
 mov dh, 0x0
 mov cl, 0x2
@@ -96,5 +96,25 @@ start_protected_mode:
 
 jmp $
 
-times 510-($-$$) db 0
+times 446-($-$$) db 0
+
+mbr_part_1:
+    db 0x00
+    db 0xff, 0xff, 0xff
+    db 0x83
+    db 0xff, 0xff, 0xff
+    dd 2048
+    dd 32768
+mbr_part_2:
+    dd 0, 0, 0, 0
+mbr_part_3:
+    dd 0, 0, 0, 0
+mbr_part_4:
+    dd 0, 0, 0, 0
+
+
+
+
+
+
 dw 0xaa55

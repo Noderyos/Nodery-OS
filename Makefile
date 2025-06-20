@@ -2,13 +2,16 @@ AS=nasm
 CC=i386-elf-gcc
 LD=i386-elf-ld
 
-CFLAGS=-Wall -Wextra -Iinclude -nolibc -nostdlib -ffreestanding
+CFLAGS=-Wall -Wextra -Iinclude -nolibc -nostdlib -ffreestanding -fpack-struct
 LDFLAGS=-T linker.ld --oformat binary -Map=layout.map
 
 OBJDIR=obj
 C_SRCS= \
     kernel/kernel.c \
     kernel/io.c \
+	kernel/string.c \
+	kernel/sys/lba.c \
+	kernel/fat.c \
     kernel/malloc.c \
     kernel/sys/ps2.c \
 	kernel/sys/io.c
@@ -25,10 +28,12 @@ OBJS=$(ASM_OBJS) $(C_OBJS)
 
 all: os.bin 
 
-os.bin: obj/boot obj/kernel.bin
+os.bin: obj/boot obj/kernel.bin part.bin
 	@echo "OUT   $@"
-	@cat $^ > $@
-	@dd if=/dev/zero of=os.bin bs=1k count=64 oflag=append conv=notrunc
+	@dd if=/dev/zero      of=os.bin bs=512 count=2048
+	@dd if=obj/boot       of=os.bin bs=512           conv=notrunc
+	@dd if=obj/kernel.bin of=os.bin bs=512 seek=1    conv=notrunc
+	@dd if=part.bin       of=os.bin bs=512 seek=2048 conv=notrunc
 
 obj/kernel.bin: $(OBJS)
 	@echo "LD    $@"

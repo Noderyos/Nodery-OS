@@ -12,8 +12,14 @@ void serialString(u16 port, char *str) {
         writeSerial(port, *str++);
 }
 
-void _itoa(u32 value, char *buf, u32 base) {
+void _itoa(i32 value, char *buf, u32 base) {
     int idx = 0;
+    u8 neg = 0;
+    if (value < 0) {
+        value = -value;
+        buf[idx++] = '-';
+        neg = 1;
+    }
     while (value > 0) {
         u8 v = value % base;
         if (v < 10) {
@@ -24,11 +30,14 @@ void _itoa(u32 value, char *buf, u32 base) {
         idx++;
         value /= base;
     }
-
-    for(int j = 0; j < idx/2; j++) {
-        u8 tmp = buf[j];
-        buf[j] = buf[idx-j-1];
-        buf[idx-j-1] = tmp;
+    if (idx) {
+        for(int j = neg; j < idx/2; j++) {
+            u8 tmp = buf[j];
+            buf[j] = buf[idx-j-1];
+            buf[idx-j-1] = tmp;
+        }
+    } else {
+        buf[idx++] = '0';
     }
     buf[idx] = '\0';
 }

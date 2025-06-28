@@ -6,6 +6,8 @@ KERNEL_LOCATION equ 0x1000
 
 UPPER_MEM equ 0x802
 EXTENDED_MEM equ 0x804
+VBE equ 0x1000
+
 
 mov [BOOT_DISK], dl
 
@@ -18,9 +20,17 @@ mov word[EXTENDED_MEM], dx
 mov sp, 0x4000
 mov bp, 0x4000
 
-; Set video mode (640 x 350, 16 colors)
-mov ah, 0
-mov al, 0x3
+; Set video mode (800 x 600, 16m colors)
+mov ax, 0x4f02
+mov bx, 0x115
+int 10h
+
+; Retrieve VBE informations
+mov ax, 0
+mov es, ax
+mov ax, 0x4F01
+mov cx, 0x0115
+mov di, 0x7e00
 int 10h
 
 ; Read disk

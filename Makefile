@@ -14,6 +14,7 @@ C_SRCS= \
 	kernel/fat.c \
     kernel/malloc.c \
     kernel/sys/ps2.c \
+    kernel/sys/vga.c \
 	kernel/sys/io.c
 
 ASM_SRCS= \

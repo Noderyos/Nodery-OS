@@ -17,6 +17,13 @@ void init_idt() {
     IDT[0x21].offset_lower = (u32)keyboard_handler & 0xFFFF;
     IDT[0x21].offset_upper = ((u32)keyboard_handler & 0xFFFF0000) >> 16;
 
+    IDT[0x2C].segment = 8;
+    IDT[0x2C].zero = 0;
+    IDT[0x2C].type = 0b10001110;
+    IDT[0x2C].offset_lower = (u32)mouse_handler & 0xFFFF;
+    IDT[0x2C].offset_upper = ((u32)mouse_handler & 0xFFFF0000) >> 16;
+
+
     for(int i = 0; i < 0x16; i++) {
         IDT[i].segment = 8;
         IDT[i].zero = 0;
@@ -53,4 +60,21 @@ void init_idt() {
 
 void kb_init() {
     outb(PIC1_DATA, 0b11111101); // Unmask IRQ1
+}
+
+void mouse_init() {
+    outb(PIC1_DATA, 0b11111001); // Unmask IRQ1 & IRQ2
+    outb(PIC2_DATA, 0b11101111); // Unmask IRQ4
+   
+    // Enable second PS/2
+    outb(PS2_COMMAND, 0xA8);
+
+    outb(PS2_COMMAND, 0x20);
+    u8 status = inb(PS2_DATA);
+    status |= 0x2;
+    outb(PS2_COMMAND, 0x60);
+    outb(PS2_DATA, status);
+
+    outb(PS2_COMMAND, 0xD4);
+    outb(PS2_DATA, 0xF4);
 }

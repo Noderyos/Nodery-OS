@@ -19,9 +19,9 @@ struct IDT_pointer {
 extern void init_idt();
 extern void load_idt(struct IDT_pointer *idt);
 extern void enable_interrupts();
-
 extern void int_handler();
 
+void mask_interrupts(); 
 void init_idt();
 
 #endif

@@ -81,12 +81,20 @@ void handle_mouse() {
 
 }
 
-extern void putpixel(u16 x, u16 y, u32 color);
+u32 tick_count = 0;
+
+void handle_tick() {
+    tick_count++;
+    outb(PIC1_COMMAND, 0x20);
+}
 
 int main(void) {
     init_idt();
     kb_init();
     mouse_init();
+    init_pit(1193182 / 1000);
+    mask_interrupts();
+
     enable_interrupts();
 
     u16 low_memory = 1024;
@@ -132,4 +140,20 @@ int main(void) {
     fseek(f, 0, SEEK_SET);
     i = fread(buf, 1, 32, f);
     printf("%d '%s'\n", i, buf);
+
+
+    u32 *vidbuf = malloc(800*600*4);
+    for(int i = 0; i < 800*600; i++) vidbuf[i] = RED;
+
+
+    void *fbuf = (u32*)vbe->framebuffer;
+    u32* blit = vidbuf;
+    u32 start = tick_count;
+    u32 c = 0;
+    while (c++ < 800*600) {
+        *(u32*)fbuf = *blit++;
+        fbuf += 3;
+    }
+    u32 end = tick_count;
+    printf("Time = %d\n", end-start);
 }

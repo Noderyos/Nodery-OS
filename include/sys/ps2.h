@@ -9,10 +9,14 @@
 
 extern void keyboard_handler();
 extern void mouse_handler();
+extern void tick_handler();
 
 void kb_init();
 void mouse_init();
 void handle_keyboard();
+void handle_tick();
 void handle_mouse();
+
+void init_pit(u16 divisor);
 
 #endif

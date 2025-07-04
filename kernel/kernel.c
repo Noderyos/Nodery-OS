@@ -10,6 +10,7 @@
 #include "fat.h"
 #include "string.h"
 #include "sys/vga.h"
+#include "ui.h"
 
 struct mbr *mbr = (void *)0x7c00;
 
@@ -146,14 +147,11 @@ int main(void) {
     for(int i = 0; i < 800*600; i++) vidbuf[i] = RED;
 
 
-    void *fbuf = (u32*)vbe->framebuffer;
-    u32* blit = vidbuf;
-    u32 start = tick_count;
-    u32 c = 0;
-    while (c++ < 800*600) {
-        *(u32*)fbuf = *blit++;
-        fbuf += 3;
-    }
-    u32 end = tick_count;
-    printf("Time = %d\n", end-start);
+
+    ui_clear(ui_rgb(255, 0, 0));
+    ui_rect(40, 60, 70, 30, ui_rgba(0, 255, 0, 128));
+    ui_circle(400, 300, 20, ui_rgb(0, 0, 255));
+    ui_line(10, 10, 50, 30, ui_rgb(255, 255, 0));
+    ui_triangle(246, 98, 72, 400, 542, 57, ui_rgb(255, 0, 255));
+
 }

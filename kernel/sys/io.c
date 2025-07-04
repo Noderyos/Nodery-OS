@@ -277,10 +277,15 @@ u16 *coms = (u16*)0x400;
 u16 *lpts = (u16*)0x408;
 
 void putpixel(u16 x, u16 y, u32 color) {
+    u8 a = (color>>24) & 0xFF;
     u32 where = (y*SCR_WIDTH+x) * 3;
-    vbe->framebuffer[where] = color & 0xFF;
-    vbe->framebuffer[where+1] = (color>>8) & 0xFF;
-    vbe->framebuffer[where+2] = (color>>16) & 0xFF;
+    u32 r = color & 0xFF, g = (color>>8) & 0xFF, b = (color>>16) & 0xFF;
+    r = vbe->framebuffer[where] * (255-a) + r*a;
+    g = vbe->framebuffer[where+1] * (255-a) + g*a;
+    b = vbe->framebuffer[where+2] * (255-a) + b*a;
+    vbe->framebuffer[where] = r/255;
+    vbe->framebuffer[where+1] = g/255;
+    vbe->framebuffer[where+2] = b/255;
 }
 
 int initSerial(u16 port) {

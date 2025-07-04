@@ -12,6 +12,7 @@ C_SRCS= \
 	kernel/string.c \
 	kernel/sys/lba.c \
 	kernel/fat.c \
+	kernel/ui.c \
     kernel/malloc.c \
     kernel/sys/ps2.c \
     kernel/sys/vga.c \

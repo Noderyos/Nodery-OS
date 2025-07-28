@@ -23,4 +23,8 @@ int strncmp(char *s1, char *s2, u32 n);
 
 u32 strnlen(char *s, u32 maxlen);
 
+void itoa(i32 value, char *buf, u32 base);
+
+double strtod(char *nptr, char **endptr);
+int sprintf(char *buf, const char *format, ...);
 #endif

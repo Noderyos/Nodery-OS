@@ -2,6 +2,7 @@
 #include "sys/ports.h"
 #include "io.h"
 #include "types.h"
+#include "string.h"
 
 #define va_start(ap, last) ((ap) = ((void*)&(last))+sizeof(last))
 #define va_arg(ap, type) (*({type* tmp = ap;(ap)+=sizeof(void*);tmp;}))
@@ -10,36 +11,6 @@
 void serialString(u16 port, char *str) {
     while(*str)
         writeSerial(port, *str++);
-}
-
-void _itoa(i32 value, char *buf, u32 base) {
-    int idx = 0;
-    u8 neg = 0;
-    if (value < 0) {
-        value = -value;
-        buf[idx++] = '-';
-        neg = 1;
-    }
-    while (value > 0) {
-        u8 v = value % base;
-        if (v < 10) {
-            buf[idx] = '0' + v;
-        } else {
-            buf[idx] = 'A' + v - 10;
-        }
-        idx++;
-        value /= base;
-    }
-    if (idx) {
-        for(int j = neg; j < idx/2; j++) {
-            u8 tmp = buf[j];
-            buf[j] = buf[idx-j-1];
-            buf[idx-j-1] = tmp;
-        }
-    } else {
-        buf[idx++] = '0';
-    }
-    buf[idx] = '\0';
 }
 
 int printf(const char *format, ...) {
@@ -61,14 +32,14 @@ int printf(const char *format, ...) {
                         putchar(va_arg(args, char));
                         break;
                     case 'd':
-                        _itoa(va_arg(args, int), buf, 10);
+                        itoa(va_arg(args, int), buf, 10);
                         j = 0;
                         while(buf[j]) {
                             putchar(buf[j++]);
                         }
                         break;
                     case 'x':
-                        _itoa(va_arg(args, int), buf, 16);
+                        itoa(va_arg(args, int), buf, 16);
                         j = 0;
                         while(buf[j]) {
                             putchar(buf[j++]);

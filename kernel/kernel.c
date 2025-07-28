@@ -98,6 +98,10 @@ int main(void) {
 
     enable_interrupts();
 
+    if(initSerial(coms[0])) {
+        printf("ERROR : Failed to initialize serial port");
+    }
+
     u16 low_memory = 1024;
     u16 upper_memory = *((u16*)0x802);
     u16 extended_memory = *((u16*)0x804);
@@ -108,11 +112,6 @@ int main(void) {
         puts("Malloc init error");
         return 0;
     }
-
-    if(initSerial(coms[0])) {
-        printf("ERROR : Failed to initialize serial port");
-    }
-
     puts("Welcome to");
     setColor(YELLOW);
     puts("NoderyOS");
@@ -142,13 +141,7 @@ int main(void) {
     i = fread(buf, 1, 32, f);
     printf("%d '%s'\n", i, buf);
 
-
-    u32 *vidbuf = malloc(800*600*4);
-    for(int i = 0; i < 800*600; i++) vidbuf[i] = RED;
-
-
-
-    ui_clear(ui_rgb(255, 0, 0));
+    ui_clear(ui_rgb(254, 0, 0));
     ui_rect(40, 60, 70, 30, ui_rgba(0, 255, 0, 128));
     ui_circle(400, 300, 20, ui_rgb(0, 0, 255));
     ui_line(10, 10, 50, 30, ui_rgb(255, 255, 0));

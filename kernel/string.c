@@ -1,5 +1,30 @@
 #include "string.h"
 
+double strtod(char *nptr, char **endptr) {
+    u8 is_neg = 0;
+    if (*nptr == '-') { is_neg = 1; nptr++; }
+    int int_part = 0;
+    double float_part = 0.f;
+    float div = 10.f;
+    while (*nptr && *nptr != '.') {
+        if (*nptr > '9' || *nptr < '0') break;
+        int_part = int_part *10 + (*nptr-'0');
+        nptr++;
+    }
+    if (*nptr == '.') {
+        nptr++;
+        while (*nptr) {
+            if (*nptr > '9' || *nptr < '0') break;
+            float_part = float_part + (*nptr-'0')/div;
+            div *= 10;
+            nptr++;
+        }
+    }
+
+    return (is_neg ? -1 : 1) * (int_part + float_part);
+}
+
+
 void *memset(void *s, u8 c, u32 n) {
     u8 *b = (u8*)s;
     
@@ -91,3 +116,82 @@ u32 strnlen(char *s, u32 maxlen) {
     u32 len = strlen(s);
     return len < maxlen ? len : maxlen;
 }
+
+
+void itoa(i32 value, char *buf, u32 base) {
+    int idx = 0;
+    u8 neg = 0;
+    if (value < 0) {
+        value = -value;
+        buf[idx++] = '-';
+        neg = 1;
+    }
+    while (value > 0) {
+        u8 v = value % base;
+        if (v < 10) {
+            buf[idx] = '0' + v;
+        } else {
+            buf[idx] = 'A' + v - 10;
+        }
+        idx++;
+        value /= base;
+    }
+    if (idx) {
+        for(int j = neg; j < idx/2; j++) {
+            u8 tmp = buf[j];
+            buf[j] = buf[idx-j-1];
+            buf[idx-j-1] = tmp;
+        }
+    } else {
+        buf[idx++] = '0';
+    }
+    buf[idx] = '\0';
+}
+
+
+#define va_start(ap, last) ((ap) = ((void*)&(last))+sizeof(last))
+#define va_arg(ap, type) (*({type* tmp = ap;(ap)+=sizeof(void*);tmp;}))
+
+int sprintf(char *buf, const char *format, ...) {
+    void* args;
+    va_start(args, format);
+    u8 ibuf[32];
+    u8 j = 0;
+    u8 is_f = 0;
+    char *str;
+    while (*format) {
+        if (is_f) {
+            is_f = 0;
+            if (*format == '%') {
+                *buf++ = '%';
+            } else {
+                switch (*format) {
+                    case 'c':
+                        *buf++ = va_arg(args, char);
+                        break;
+                    case 'd':
+                        itoa(va_arg(args, int), ibuf, 10);
+                        buf = stpcpy(buf, ibuf);
+                        break;
+                    case 'x':
+                        itoa(va_arg(args, int), ibuf, 16);
+                        buf = stpcpy(buf, ibuf);
+                        break;
+                    case 's':
+                        str = va_arg(args, char *);
+                        buf = stpcpy(buf, str);
+                        break;
+                }
+            }
+        } else {
+            if (*format == '%') {
+                is_f = 1;
+            } else {
+                *buf++ = *format;
+            }
+        }
+        format++;
+    }
+    return 0;
+}
+

@@ -6,7 +6,7 @@ KERNEL_LOCATION equ 0x1000
 
 UPPER_MEM equ 0x802
 EXTENDED_MEM equ 0x804
-VBE equ 0x1000
+VBE equ 0x7e00
 
 
 mov [BOOT_DISK], dl
@@ -30,7 +30,7 @@ mov ax, 0
 mov es, ax
 mov ax, 0x4F01
 mov cx, 0x0115
-mov di, 0x7e00
+mov di, VBE
 int 10h
 
 ; Read disk

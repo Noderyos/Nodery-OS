@@ -4,16 +4,16 @@
 #include "types.h"
 
 struct IDT_entry {
-    u16 offset_lower;
-    u16 segment;
-    u8 zero;
-    u8 type;
-    u16 offset_upper;
+    uint16_t offset_lower;
+    uint16_t segment;
+    uint8_t zero;
+    uint8_t type;
+    uint16_t offset_upper;
 } __attribute__((packed));
 
 struct IDT_pointer {
-    u16 limit;
-    u32 offset;
+    uint16_t limit;
+    uint32_t offset;
 } __attribute__((packed));
 
 extern void init_idt();

@@ -1,7 +1,7 @@
 #include "string.h"
 
 double strtod(char *nptr, char **endptr) {
-    u8 is_neg = 0;
+    uint8_t is_neg = 0;
     if (*nptr == '-') { is_neg = 1; nptr++; }
     int int_part = 0;
     double float_part = 0.f;
@@ -25,26 +25,26 @@ double strtod(char *nptr, char **endptr) {
 }
 
 
-void *memset(void *s, u8 c, u32 n) {
-    u8 *b = (u8*)s;
+void *memset(void *s, uint8_t c, uint32_t n) {
+    uint8_t *b = (uint8_t*)s;
     
-    for (u32 i = 0; i < n; i++) {
+    for (uint32_t i = 0; i < n; i++) {
         b[i] = c;
     }
 
     return s;
 }
 
-void *memcpy(void *dest, void *src, u32 n) {
+void *memcpy(void *dest, void *src, uint32_t n) {
     mempcpy(dest, src, n);
     return dest;
 }
 
-void *mempcpy(void *dest, void *src, u32 n) {
-    u8 *d = (u8*)dest;
-    u8 *s = (u8*)src;
+void *mempcpy(void *dest, void *src, uint32_t n) {
+    uint8_t *d = (uint8_t*)dest;
+    uint8_t *s = (uint8_t*)src;
 
-    for (u32 i = 0; i < n; i++) {
+    for (uint32_t i = 0; i < n; i++) {
         d[i] = s[i];
     }
 
@@ -77,21 +77,21 @@ int strcmp(char *s1, char *s2) {
     return 0;
 }
 
-char *stpncpy(char *dst, char *src, u32 dsize) {
-    u32 dlen = strnlen(src, dsize);
+char *stpncpy(char *dst, char *src, uint32_t dsize) {
+    uint32_t dlen = strnlen(src, dsize);
     return memset(mempcpy(dst, src, dlen), 0, dsize - dlen);
 }
 
-char *strncpy(char *dst, char *src, u32 dsize) {
+char *strncpy(char *dst, char *src, uint32_t dsize) {
     stpncpy(dst, src, dsize);
     return dst;
 }
 
-char *strncat(char *dst, char *src, u32 n) {
+char *strncat(char *dst, char *src, uint32_t n) {
     return strncpy(dst + strlen(dst), src, n);
 }
 
-int strncmp(char *s1, char *s2, u32 n) {
+int strncmp(char *s1, char *s2, uint32_t n) {
     while ((*s1 || *s2) && n) {
         if (*s1 != *s2) return *s1 - *s2;
         s1++;
@@ -106,28 +106,28 @@ char *strchr(char *str, char c) {
     return *str == 0 ? 0 : str;
 }
 
-u32 strlen(char *str) {
+uint32_t strlen(char *str) {
     char *s2 = str;
     while (*s2) s2++;
     return s2-str;
 }
 
-u32 strnlen(char *s, u32 maxlen) {
-    u32 len = strlen(s);
+uint32_t strnlen(char *s, uint32_t maxlen) {
+    uint32_t len = strlen(s);
     return len < maxlen ? len : maxlen;
 }
 
 
-void itoa(i32 value, char *buf, u32 base) {
+void itoa(int32_t value, char *buf, uint32_t base) {
     int idx = 0;
-    u8 neg = 0;
+    uint8_t neg = 0;
     if (value < 0) {
         value = -value;
         buf[idx++] = '-';
         neg = 1;
     }
     while (value > 0) {
-        u8 v = value % base;
+        uint8_t v = value % base;
         if (v < 10) {
             buf[idx] = '0' + v;
         } else {
@@ -138,7 +138,7 @@ void itoa(i32 value, char *buf, u32 base) {
     }
     if (idx) {
         for(int j = neg; j < idx/2; j++) {
-            u8 tmp = buf[j];
+            uint8_t tmp = buf[j];
             buf[j] = buf[idx-j-1];
             buf[idx-j-1] = tmp;
         }
@@ -155,9 +155,9 @@ void itoa(i32 value, char *buf, u32 base) {
 int sprintf(char *buf, const char *format, ...) {
     void* args;
     va_start(args, format);
-    u8 ibuf[32];
-    u8 j = 0;
-    u8 is_f = 0;
+    uint8_t ibuf[32];
+    uint8_t j = 0;
+    uint8_t is_f = 0;
     char *str;
     while (*format) {
         if (is_f) {

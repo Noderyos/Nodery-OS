@@ -3,53 +3,53 @@
 
 #include "types.h"
 
-typedef enum : u8 {
+typedef enum : uint8_t {
     disk = 0xF8
 } MediaDescriptor;
 
 struct __attribute__((packed)) fat_bootsector {
-    u8 code_jump[3];
+    uint8_t code_jump[3];
     char oem_id[8];
-    u16 bytes_per_sector;
-    u8 sectors_per_cluster;
-    u16 resv_sectors;
-    u8 fat_count;
-    u16 root_entry_count;
-    u16 smol_sector_count;
+    uint16_t bytes_per_sector;
+    uint8_t sectors_per_cluster;
+    uint16_t resv_sectors;
+    uint8_t fat_count;
+    uint16_t root_entry_count;
+    uint16_t smol_sector_count;
     MediaDescriptor media_descriptor;
-    u16 sectors_per_fat;
-    u16 sectors_per_track;
-    u16 head_count;
-    u32 hidden_sectors;
-    u32 large_sector_count;
-    u8 drive_number;
-    u8 resv;
-    u8 ext_boot_sig;
-    u32 serial_number;
+    uint16_t sectors_per_fat;
+    uint16_t sectors_per_track;
+    uint16_t head_count;
+    uint32_t hidden_sectors;
+    uint32_t large_sector_count;
+    uint8_t drive_number;
+    uint8_t resv;
+    uint8_t ext_boot_sig;
+    uint32_t serial_number;
     char label[11];
     char fs_type[8];
-    u8 code[448];
-    u16 sig;
+    uint8_t code[448];
+    uint16_t sig;
 };
 
 typedef struct FILE {
-    u16 cluster;
-    u32 filesize;
-    u32 offset;
+    uint16_t cluster;
+    uint32_t filesize;
+    uint32_t offset;
 } FILE;
 
 enum {
     SEEK_SET, SEEK_CUR, SEEK_END
 };
 
-int init_fs(u32 start_sector);
+int init_fs(uint32_t start_sector);
 int read_file(char *filename);
 int list_dir();
 
-u32 fread(void *buf, u32 size, u32 n, FILE *stream);
+uint32_t fread(void *buf, uint32_t size, uint32_t n, FILE *stream);
 FILE *fopen(char *path, char *mode);
 int fseek(FILE *stream, long offset, int whence);
 int fclose(FILE *stream);
-u32 fwrite(void *ptr, u32 size, u32 n, FILE *stream);
+uint32_t fwrite(void *ptr, uint32_t size, uint32_t n, FILE *stream);
 
 #endif

@@ -3,27 +3,27 @@
 
 #include "types.h"
 
-void *memcpy(void *dest, void *src, u32 n);
-void *mempcpy(void *dest, void *src, u32 n);
-void *memset(void *s, u8 c, u32 n);
+void *memcpy(void *dest, void *src, uint32_t n);
+void *mempcpy(void *dest, void *src, uint32_t n);
+void *memset(void *s, uint8_t c, uint32_t n);
 
 char *stpcpy(char *dst, char *src);
 char *strcpy(char *dst, char *src);
-char *strncpy(char *dst, char *src, u32 dsize);
-char *stpncpy(char *dst, char *src, u32 dsize);
+char *strncpy(char *dst, char *src, uint32_t dsize);
+char *stpncpy(char *dst, char *src, uint32_t dsize);
 
 char *strcat(char *dst, char *src);
-char *strncat(char *dst, char *src, u32 n);
+char *strncat(char *dst, char *src, uint32_t n);
 
 char *strchr(char *str, char c);
-u32 strlen(char *str);
+uint32_t strlen(char *str);
 
 int strcmp(char *s1, char *s2);
-int strncmp(char *s1, char *s2, u32 n);
+int strncmp(char *s1, char *s2, uint32_t n);
 
-u32 strnlen(char *s, u32 maxlen);
+uint32_t strnlen(char *s, uint32_t maxlen);
 
-void itoa(i32 value, char *buf, u32 base);
+void itoa(int32_t value, char *buf, uint32_t base);
 
 double strtod(char *nptr, char **endptr);
 int sprintf(char *buf, const char *format, ...);

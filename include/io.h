@@ -3,7 +3,7 @@
 
 #include "sys/io.h"
 
-void serialString(u16 port, char *str);
+void serialString(uint16_t port, char *str);
 
 int puts(const char *s);
 int printf(const char *format, ...);

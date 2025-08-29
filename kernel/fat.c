@@ -10,50 +10,50 @@
 struct fat_bootsector bs;
 
 struct fat_attr {
-    u8 ReadOnly   : 1;
-    u8 Hidden     : 1;
-    u8 System     : 1;
-    u8 VolumeName : 1;
-    u8 Directory  : 1;
-    u8 AchieveFlag: 1;
-    u8 Reserved   : 2;
+    uint8_t ReadOnly   : 1;
+    uint8_t Hidden     : 1;
+    uint8_t System     : 1;
+    uint8_t VolumeName : 1;
+    uint8_t Directory  : 1;
+    uint8_t AchieveFlag: 1;
+    uint8_t Reserved   : 2;
 };
 
 struct Date {
-    u8 Day: 5;
-    u8 Month: 4;
-    u8 Year: 7;
+    uint8_t Day: 5;
+    uint8_t Month: 4;
+    uint8_t Year: 7;
 };
 
 struct Time {
-    u8 Second: 5;
-    u8 Minute: 6;
-    u8 Hour: 5;
+    uint8_t Second: 5;
+    uint8_t Minute: 6;
+    uint8_t Hour: 5;
 };
 
 struct fat_dir_entry {
     char filename[8];
     char extension[3];
     struct fat_attr attr;
-    u8 resv;
-    u8 c_millis;
+    uint8_t resv;
+    uint8_t c_millis;
     struct Time c_time;
     struct Date c_date;
     struct Date a_date;
-    u16 resv2;
+    uint16_t resv2;
     struct Time w_time;
     struct Date w_date;
-    u16 cluster;
-    u32 filesize;
+    uint16_t cluster;
+    uint32_t filesize;
 };
 
-u16 *fat;
+uint16_t *fat;
 
 struct fat_dir_entry *root_entries;
 
-u32 data_addr;
+uint32_t data_addr;
 
-u32 bytes_per_cluster;
+uint32_t bytes_per_cluster;
 
 void clean_entry(struct fat_dir_entry *entry) {
     for (int i = 0; i < 8; i++)
@@ -62,16 +62,16 @@ void clean_entry(struct fat_dir_entry *entry) {
         if (entry->extension[i] == ' ') entry->extension[i] = 0;
 }
 
-int init_fs(u32 start_sector) {
+int init_fs(uint32_t start_sector) {
     ata_lba_read(start_sector, 1, &bs);
     if (!bs.code_jump[0]) return -1;
     if (bs.bytes_per_sector != 512) return -2;
 
-    u32 fat_addr = start_sector + bs.resv_sectors;
+    uint32_t fat_addr = start_sector + bs.resv_sectors;
     fat = malloc(bs.sectors_per_fat * bs.bytes_per_sector);
     ata_lba_read(fat_addr, bs.sectors_per_fat, fat);
 
-    u32 root_entries_addr = fat_addr + bs.sectors_per_fat * bs.fat_count;
+    uint32_t root_entries_addr = fat_addr + bs.sectors_per_fat * bs.fat_count;
     root_entries = malloc(bs.root_entry_count * sizeof(struct fat_dir_entry));
     ata_lba_read(root_entries_addr, (bs.root_entry_count * sizeof(struct fat_dir_entry))/512, root_entries);
 
@@ -105,17 +105,17 @@ int read_file(char *filename) {
     }
     if (idx < 0) return -1;
 
-    u16 cur_cluster = root_entries[idx].cluster;
-    u32 filesize = root_entries[idx].filesize;
+    uint16_t cur_cluster = root_entries[idx].cluster;
+    uint32_t filesize = root_entries[idx].filesize;
 
-    u8 *buf = malloc(bs.sectors_per_cluster * bs.bytes_per_sector);
+    uint8_t *buf = malloc(bs.sectors_per_cluster * bs.bytes_per_sector);
     if (!buf) return -1;
 
     while (cur_cluster != 0xFFFF) {
         ata_lba_read(data_addr + (cur_cluster-2)*bs.sectors_per_cluster, bs.sectors_per_cluster, buf);
-        u32 to_read = filesize > bytes_per_cluster ? bytes_per_cluster : filesize;
+        uint32_t to_read = filesize > bytes_per_cluster ? bytes_per_cluster : filesize;
         
-        for (u32 i = 0; i < to_read; i++) printf("%c", buf[i]);
+        for (uint32_t i = 0; i < to_read; i++) printf("%c", buf[i]);
         
         cur_cluster = fat[cur_cluster];
         filesize -= bytes_per_cluster;
@@ -180,8 +180,8 @@ FILE *fopen(char *path, char *mode) {
     return file;
 }
 
-u16 get_nth_cluster(u16 start, u16 count) {
-    u16 cur_cluster = start;
+uint16_t get_nth_cluster(uint16_t start, uint16_t count) {
+    uint16_t cur_cluster = start;
     while (count--) {
         if (count && cur_cluster == 0xFFFF) return 0xFFFF;
         cur_cluster = fat[cur_cluster];
@@ -189,17 +189,17 @@ u16 get_nth_cluster(u16 start, u16 count) {
     return cur_cluster;
 }
 
-u32 fread(void *buf, u32 size, u32 n, FILE *stream) {
-    u8 *buffer = malloc(bytes_per_cluster);
+uint32_t fread(void *buf, uint32_t size, uint32_t n, FILE *stream) {
+    uint8_t *buffer = malloc(bytes_per_cluster);
 
-    u32 to_read = n * size;
+    uint32_t to_read = n * size;
 
-    u16 cur_cluster = get_nth_cluster(stream->cluster, stream->offset / bytes_per_cluster);
-    u32 offset = stream->offset % bytes_per_cluster;
+    uint16_t cur_cluster = get_nth_cluster(stream->cluster, stream->offset / bytes_per_cluster);
+    uint32_t offset = stream->offset % bytes_per_cluster;
 
     while (to_read) {
         if (stream->filesize == stream->offset) break;
-        u32 r = MIN(to_read, bytes_per_cluster-offset);
+        uint32_t r = MIN(to_read, bytes_per_cluster-offset);
         r = MIN(r, stream->filesize-stream->offset);
         ata_lba_read(data_addr + (cur_cluster-2)*bs.sectors_per_cluster, bs.sectors_per_cluster, buffer);
         memcpy(buf, buffer+offset, r);
@@ -233,7 +233,7 @@ int fclose(FILE *stream) {
     free(stream);
 }
 
-u16 allocate_cluster(u16 current) {
+uint16_t allocate_cluster(uint16_t current) {
     for (int i = 1; i < bs.sectors_per_fat*bs.bytes_per_sector/sizeof(*fat); i++) {
         if (fat[i] == 0x0000) {
             fat[current] = i;
@@ -244,16 +244,16 @@ u16 allocate_cluster(u16 current) {
     return 0;
 }
 
-u32 fwrite(void *ptr, u32 size, u32 n, FILE *stream) {
-    u8 *buffer = malloc(bytes_per_cluster);    
+uint32_t fwrite(void *ptr, uint32_t size, uint32_t n, FILE *stream) {
+    uint8_t *buffer = malloc(bytes_per_cluster);    
 
-    u32 to_write = n * size;
+    uint32_t to_write = n * size;
 
-    u16 cur_cluster = get_nth_cluster(stream->cluster, stream->offset / bytes_per_cluster);
-    u32 offset = stream->offset % bytes_per_cluster;
+    uint16_t cur_cluster = get_nth_cluster(stream->cluster, stream->offset / bytes_per_cluster);
+    uint32_t offset = stream->offset % bytes_per_cluster;
 
     while (to_write) {
-        u32 r = MIN(to_write, bytes_per_cluster-offset);
+        uint32_t r = MIN(to_write, bytes_per_cluster-offset);
 
         ata_lba_read(data_addr + (cur_cluster-2)*bs.sectors_per_cluster, bs.sectors_per_cluster, buffer);
         memcpy(buffer + offset, ptr, r);

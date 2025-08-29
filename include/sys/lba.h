@@ -5,7 +5,7 @@
 #include "../io.h"
 #include "ports.h"
 
-void ata_lba_read(u32 sector, u8 count, void *buf);
-void ata_lba_write(u32 sector, u8 count, void *buf);
+void ata_lba_read(uint32_t sector, uint8_t count, void *buf);
+void ata_lba_write(uint32_t sector, uint8_t count, void *buf);
 
 #endif

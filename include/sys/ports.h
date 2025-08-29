@@ -8,10 +8,10 @@
 #define PIC2_COMMAND 0xA0
 #define PIC2_DATA 0xA1
 
-u8 inb(u16 port);
-void outb(u16 port, u8 value);
-u16 inw(u16 port);
-void outw(u16 port, u16 value);
+uint8_t inb(uint16_t port);
+void outb(uint16_t port, uint8_t value);
+uint16_t inw(uint16_t port);
+void outw(uint16_t port, uint16_t value);
 
 
 #endif

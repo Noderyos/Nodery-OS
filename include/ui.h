@@ -6,11 +6,11 @@
 #define ui_rgba(r, g, b, a) ((a) << 24 | (r)<<16 | (g) << 8 | (b))
 #define ui_rgb(r, g, b) ui_rgba(r, g, b, 255)
 
-void ui_rect(i16 x, i16 y, u16 w, u16 h, u32 color);
-void ui_circle(i16 x, i16 y, u16 r, u32 color);
-void ui_line(i16 x1, i16 y1, i16 x2, i16 y2, u32 color);
-void ui_triangle(i16 x1, i16 y1, i16 x2, i16 y2, i16 x3, i16 y3, u32 color);
-void ui_clear(u32 color);
+void ui_rect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color);
+void ui_circle(int16_t x, int16_t y, uint16_t r, uint32_t color);
+void ui_line(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint32_t color);
+void ui_triangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint32_t color);
+void ui_clear(uint32_t color);
 
 
 #endif

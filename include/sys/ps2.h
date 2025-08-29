@@ -17,6 +17,6 @@ void handle_keyboard();
 void handle_tick();
 void handle_mouse();
 
-void init_pit(u16 divisor);
+void init_pit(uint16_t divisor);
 
 #endif

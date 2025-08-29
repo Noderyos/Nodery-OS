@@ -22,9 +22,9 @@ int cmd_len = 0;
 char cmd[MAX_CMD];
 
 void handle_keyboard() {
-    u8 status = inb(PS2_COMMAND);
+    uint8_t status = inb(PS2_COMMAND);
     if (status & 1) {
-        u8 keycode = inb(PS2_DATA);
+        uint8_t keycode = inb(PS2_DATA);
         if(keycode == LSHIFT) is_shift = 1;
         else if(keycode == LSHIFT+0x80) is_shift = 0;
         else if(keycode == LMAJ) is_shift = !is_shift;
@@ -49,24 +49,24 @@ void handle_keyboard() {
     outb(PIC1_COMMAND, 0x20);
 }
 
-u8 mouse_packet[3];
-u8 mouse_cycle = 0;
+uint8_t mouse_packet[3];
+uint8_t mouse_cycle = 0;
 
-u32 mouse_x = 0;
-u32 mouse_y = 0;
+uint32_t mouse_x = 0;
+uint32_t mouse_y = 0;
 
 void handle_mouse() {
     outb(PIC2_COMMAND, 0x20);
     outb(PIC1_COMMAND, 0x20);
 
-    u8 status = inb(PS2_COMMAND);
+    uint8_t status = inb(PS2_COMMAND);
     if (status & 1) {
-        u8 data = inb(PS2_DATA);
+        uint8_t data = inb(PS2_DATA);
         mouse_packet[mouse_cycle++] = data;
         if (mouse_cycle == 3) {
             mouse_cycle = 0;
-            u32 x = mouse_packet[1] - ((mouse_packet[0]>>4)&1)*256;
-            u32 y = mouse_packet[2] - ((mouse_packet[0]>>5)&1)*256;
+            uint32_t x = mouse_packet[1] - ((mouse_packet[0]>>4)&1)*256;
+            uint32_t y = mouse_packet[2] - ((mouse_packet[0]>>5)&1)*256;
 
             mouse_x += x;
             mouse_y -= y;
@@ -82,7 +82,7 @@ void handle_mouse() {
 
 }
 
-u32 tick_count = 0;
+uint32_t tick_count = 0;
 
 void handle_tick() {
     tick_count++;
@@ -102,10 +102,10 @@ int main(void) {
         printf("ERROR : Failed to initialize serial port");
     }
 
-    u16 low_memory = 1024;
-    u16 upper_memory = *((u16*)0x802);
-    u16 extended_memory = *((u16*)0x804);
-    u32 available_memory = 1024*(low_memory + upper_memory + extended_memory * 64);
+    uint16_t low_memory = 1024;
+    uint16_t upper_memory = *((uint16_t*)0x802);
+    uint16_t extended_memory = *((uint16_t*)0x804);
+    uint32_t available_memory = 1024*(low_memory + upper_memory + extended_memory * 64);
     printf("Memory available : %dKb\n", available_memory / 1024);
     if(init_malloc(available_memory) < 0){
         setColor(RED);
@@ -130,7 +130,7 @@ int main(void) {
     }
 
     char buf[32];
-    u32 i = fread(buf, 1, 32, f);
+    uint32_t i = fread(buf, 1, 32, f);
     printf("%d '%s'\n", i, buf);
     memset(buf, 0, 32);
     fseek(f, 0, SEEK_SET);

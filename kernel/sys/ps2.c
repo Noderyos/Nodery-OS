@@ -14,28 +14,28 @@ void init_idt() {
     IDT[0x20].segment = 8;
     IDT[0x20].zero = 0;
     IDT[0x20].type = 0b10001110;
-    IDT[0x20].offset_lower = (u32)tick_handler & 0xFFFF;
-    IDT[0x20].offset_upper = ((u32)tick_handler & 0xFFFF0000) >> 16;
+    IDT[0x20].offset_lower = (uint32_t)tick_handler & 0xFFFF;
+    IDT[0x20].offset_upper = ((uint32_t)tick_handler & 0xFFFF0000) >> 16;
 
     IDT[0x21].segment = 8;
     IDT[0x21].zero = 0;
     IDT[0x21].type = 0b10001110;
-    IDT[0x21].offset_lower = (u32)keyboard_handler & 0xFFFF;
-    IDT[0x21].offset_upper = ((u32)keyboard_handler & 0xFFFF0000) >> 16;
+    IDT[0x21].offset_lower = (uint32_t)keyboard_handler & 0xFFFF;
+    IDT[0x21].offset_upper = ((uint32_t)keyboard_handler & 0xFFFF0000) >> 16;
 
     IDT[0x2C].segment = 8;
     IDT[0x2C].zero = 0;
     IDT[0x2C].type = 0b10001110;
-    IDT[0x2C].offset_lower = (u32)mouse_handler & 0xFFFF;
-    IDT[0x2C].offset_upper = ((u32)mouse_handler & 0xFFFF0000) >> 16;
+    IDT[0x2C].offset_lower = (uint32_t)mouse_handler & 0xFFFF;
+    IDT[0x2C].offset_upper = ((uint32_t)mouse_handler & 0xFFFF0000) >> 16;
 
 
     for(int i = 0; i < 0x16; i++) {
         IDT[i].segment = 8;
         IDT[i].zero = 0;
         IDT[i].type = 0b10001110;
-        IDT[i].offset_lower = (u32)int_handler & 0xFFFF;
-        IDT[i].offset_upper = ((u32)int_handler & 0xFFFF0000) >> 16;
+        IDT[i].offset_lower = (uint32_t)int_handler & 0xFFFF;
+        IDT[i].offset_upper = ((uint32_t)int_handler & 0xFFFF0000) >> 16;
     }
 
     // Restart PICs
@@ -59,12 +59,12 @@ void init_idt() {
     outb(PIC2_DATA, 0xFF);
 
     struct IDT_pointer idt_ptr;
-    idt_ptr.offset = (u32)&IDT;
+    idt_ptr.offset = (uint32_t)&IDT;
     idt_ptr.limit = sizeof(struct IDT_entry)*256;
     load_idt(&idt_ptr);
 }
 
-void init_pit(u16 divisor) {
+void init_pit(uint16_t divisor) {
     outb(0x43, 0b00110110);
     outb(0x40, divisor & 0xFF);
     outb(0x40, divisor >> 8);
@@ -84,7 +84,7 @@ void mouse_init() {
     outb(PS2_COMMAND, 0xA8);
 
     outb(PS2_COMMAND, 0x20);
-    u8 status = inb(PS2_DATA);
+    uint8_t status = inb(PS2_DATA);
     status |= 0x2;
     outb(PS2_COMMAND, 0x60);
     outb(PS2_DATA, status);

@@ -5,7 +5,7 @@
 
 typedef struct {
     void *start;
-    u32 size;
+    uint32_t size;
 }malloc_entry;
 
 int init_malloc(unsigned int mem_size);

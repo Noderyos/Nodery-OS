@@ -7,7 +7,7 @@
 struct vbe_mode_info_structure *vbe = (void *)0x7E00;
 
 
-u8 _3dfx8x16[4096] = {
+uint8_t _3dfx8x16[4096] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x7e, 0x81, 0xa5, 0x81, 0x81, 0xa5, 0x99, 0x81, 0x81, 0x7e, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x7e, 0xff, 0xdb, 0xff, 0xff, 0xdb, 0xe7, 0xff, 0xff, 0x7e, 0x00, 0x00, 0x00, 0x00, 
@@ -273,13 +273,13 @@ u8 _3dfx8x16[4096] = {
 #define SCR_WIDTH 800
 #define SCR_HEIGHT 600
 
-u16 *coms = (u16*)0x400;
-u16 *lpts = (u16*)0x408;
+uint16_t *coms = (uint16_t*)0x400;
+uint16_t *lpts = (uint16_t*)0x408;
 
-void putpixel(u16 x, u16 y, u32 color) {
-    u8 a = (color>>24) & 0xFF;
-    u32 where = (y*SCR_WIDTH+x) * 3;
-    u32 r = color & 0xFF, g = (color>>8) & 0xFF, b = (color>>16) & 0xFF;
+void putpixel(uint16_t x, uint16_t y, uint32_t color) {
+    uint8_t a = (color>>24) & 0xFF;
+    uint32_t where = (y*SCR_WIDTH+x) * 3;
+    uint32_t r = color & 0xFF, g = (color>>8) & 0xFF, b = (color>>16) & 0xFF;
     r = vbe->framebuffer[where] * (255-a) + r*a;
     g = vbe->framebuffer[where+1] * (255-a) + g*a;
     b = vbe->framebuffer[where+2] * (255-a) + b*a;
@@ -288,7 +288,7 @@ void putpixel(u16 x, u16 y, u32 color) {
     vbe->framebuffer[where+2] = b/255;
 }
 
-int initSerial(u16 port) {
+int initSerial(uint16_t port) {
     outb(port + 1, 0x00);
     outb(port + 3, 0x80);
     outb(port + 3, 0x03);
@@ -304,11 +304,11 @@ int initSerial(u16 port) {
     return 0;
 }
 
-void writeSerial(u16 port, u8 c) {
+void writeSerial(uint16_t port, uint8_t c) {
     outb(port, c);
 }
 
-u8 readSerial(u16 port) {
+uint8_t readSerial(uint16_t port) {
     return inb(port);
 }
 
@@ -337,16 +337,16 @@ void setColor(TermColor c) {
 int putchar(int c) {
     if (c == '\n') {
         newLine();
-        return (u8)c;
+        return (uint8_t)c;
     }
     
 
-    u8 *b = &_3dfx8x16[c*FONT_HEIGHT];
+    uint8_t *b = &_3dfx8x16[c*FONT_HEIGHT];
 
     for(int i = 0; i < FONT_HEIGHT; i++) {
-        u8 letter = b[i];
+        uint8_t letter = b[i];
         for(int j = 0; j < FONT_WIDTH; j++) {
-            u8 part = (letter>>(FONT_WIDTH-1-j))&1;
+            uint8_t part = (letter>>(FONT_WIDTH-1-j))&1;
             if (part) {
                 putpixel(scr_x+j, scr_y+i, color);
             }
@@ -358,7 +358,7 @@ int putchar(int c) {
     if (scr_x == SCR_WIDTH) {
         newLine();
     }
-    return (u8)c;
+    return (uint8_t)c;
 }
 
 void backspace() {

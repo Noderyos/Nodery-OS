@@ -4,41 +4,41 @@
 #include "../types.h"
 
 struct vbe_mode_info_structure {
-	u16 attributes;
-	u8 window_a;
-	u8 window_b;
-	u16 granularity;
-	u16 window_size;
-	u16 segment_a;
-	u16 segment_b;
-	u32 win_func_ptr;
-	u16 pitch;
-	u16 width;
-	u16 height;
-	u8 w_char;
-	u8 y_char;
-	u8 planes;
-	u8 bpp;
-	u8 banks;
-	u8 memory_model;
-	u8 bank_size;
-	u8 image_pages;
-	u8 reserved0;
+	uint16_t attributes;
+	uint8_t window_a;
+	uint8_t window_b;
+	uint16_t granularity;
+	uint16_t window_size;
+	uint16_t segment_a;
+	uint16_t segment_b;
+	uint32_t win_func_ptr;
+	uint16_t pitch;
+	uint16_t width;
+	uint16_t height;
+	uint8_t w_char;
+	uint8_t y_char;
+	uint8_t planes;
+	uint8_t bpp;
+	uint8_t banks;
+	uint8_t memory_model;
+	uint8_t bank_size;
+	uint8_t image_pages;
+	uint8_t reserved0;
 
-	u8 red_mask;
-	u8 red_position;
-	u8 green_mask;
-	u8 green_position;
-	u8 blue_mask;
-	u8 blue_position;
-	u8 reserved_mask;
-	u8 reserved_position;
-	u8 direct_color_attributes;
+	uint8_t red_mask;
+	uint8_t red_position;
+	uint8_t green_mask;
+	uint8_t green_position;
+	uint8_t blue_mask;
+	uint8_t blue_position;
+	uint8_t reserved_mask;
+	uint8_t reserved_position;
+	uint8_t direct_color_attributes;
 
-	u8* framebuffer;
-	u32 off_screen_mem_off;
-	u16 off_screen_mem_size;
-	u8 reserved1[206];
+	uint8_t* framebuffer;
+	uint32_t off_screen_mem_off;
+	uint16_t off_screen_mem_size;
+	uint8_t reserved1[206];
 } __attribute__ ((packed));
 
 extern struct vbe_mode_info_structure *vbe;

@@ -8,7 +8,7 @@
 #define va_arg(ap, type) (*({type* tmp = ap;(ap)+=sizeof(void*);tmp;}))
 
 
-void serialString(u16 port, char *str) {
+void serialString(uint16_t port, char *str) {
     while(*str)
         writeSerial(port, *str++);
 }
@@ -18,8 +18,8 @@ int printf(const char *format, ...) {
     va_start(args, format);
     
     char buf[32];
-    u8 j = 0;
-    u8 is_f = 0;
+    uint8_t j = 0;
+    uint8_t is_f = 0;
     char *str;
     while (*format) {
         if (is_f) {

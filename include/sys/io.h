@@ -24,16 +24,16 @@ typedef enum {
     WHITE = 0xFFFFFFFF
 } TermColor;
 
-extern u16 *coms;
-extern u16 *lpts;
+extern uint16_t *coms;
+extern uint16_t *lpts;
 
-int initSerial(u16 port);
-void writeSerial(u16 port, u8 c);
-u8 readSerial(u16 port);
+int initSerial(uint16_t port);
+void writeSerial(uint16_t port, uint8_t c);
+uint8_t readSerial(uint16_t port);
 
 void setColor(TermColor color);
 int putchar(int c);
 void backspace();
 
-void putpixel(u16 x, u16 y, u32 color);
+void putpixel(uint16_t x, uint16_t y, uint32_t color);
 #endif

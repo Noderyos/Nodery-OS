@@ -5,11 +5,11 @@
 #define START_ADDR 0x1000000
 #define MALLOC_ENTRY_COUNT 256
 
-u32 blob_size;
+uint32_t blob_size;
 malloc_entry *malloc_entries;
 void *malloc_blob;
 
-int init_malloc(u32 mem_size){
+int init_malloc(uint32_t mem_size){
     if(mem_size < START_ADDR + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT)
         return -1;
     malloc_entries = (malloc_entry *)START_ADDR;
@@ -37,7 +37,7 @@ int find_entry(void *ptr){
     return -1;
 }
 
-void *realloc(void *ptr, u32 new_size){
+void *realloc(void *ptr, uint32_t new_size){
     int entry = find_entry(ptr);
     if(entry == -1)
         return 0;
@@ -46,11 +46,11 @@ void *realloc(void *ptr, u32 new_size){
     if(!new_ptr)
         return 0;
 
-    u32 old_size = malloc_entries[entry].size;
-    u32 size = old_size < new_size ? old_size : new_size;
+    uint32_t old_size = malloc_entries[entry].size;
+    uint32_t size = old_size < new_size ? old_size : new_size;
 
-    for (u32 i = 0; i < size; ++i)
-        *((u8*)new_ptr + i) = *((u8*)ptr + i);
+    for (uint32_t i = 0; i < size; ++i)
+        *((uint8_t*)new_ptr + i) = *((uint8_t*)ptr + i);
 
     free(ptr);
     return new_ptr;
@@ -69,7 +69,7 @@ int find_up_nearest(void *ptr){
     return min;
 }
 
-void *malloc(u32 size){
+void *malloc(uint32_t size){
     int entry = find_empty_entry();
     if(entry < 0) return 0;
 
@@ -77,7 +77,7 @@ void *malloc(u32 size){
 
     int near;
     while ((near = find_up_nearest(cursor)) >= 0                 // Mem allocated after
-            && (u32)(malloc_entries[near].start - cursor) < size // and not enough space
+            && (uint32_t)(malloc_entries[near].start - cursor) < size // and not enough space
     ) cursor = malloc_entries[near].start + malloc_entries[near].size;
 
     // No memory allocated after and not enough space

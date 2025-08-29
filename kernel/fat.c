@@ -230,11 +230,11 @@ int fseek(FILE *stream, long offset, int whence) {
 }
 
 int fclose(FILE *stream) {
-    free(stream);
+    return free(stream);
 }
 
 uint16_t allocate_cluster(uint16_t current) {
-    for (int i = 1; i < bs.sectors_per_fat*bs.bytes_per_sector/sizeof(*fat); i++) {
+    for (uint32_t i = 1; i < bs.sectors_per_fat*bs.bytes_per_sector/sizeof(*fat); i++) {
         if (fat[i] == 0x0000) {
             fat[current] = i;
             fat[i] = 0xFFFF;

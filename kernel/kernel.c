@@ -71,8 +71,8 @@ void handle_mouse() {
             mouse_x += x;
             mouse_y -= y;
 
-            if (mouse_x < 0) mouse_x = 0;
-            if (mouse_y < 0) mouse_y = 0;
+            if ((int32_t)mouse_x < 0) mouse_x = 0;
+            if ((int32_t)mouse_y < 0) mouse_y = 0;
             if (mouse_x >= 800) mouse_x = 799;
             if (mouse_y >= 600) mouse_y = 599;
 

@@ -21,6 +21,9 @@ double strtod(char *nptr, char **endptr) {
         }
     }
 
+    if (*nptr) *endptr = nptr;
+    else *endptr = 0;
+
     return (is_neg ? -1 : 1) * (int_part + float_part);
 }
 
@@ -155,8 +158,7 @@ void itoa(int32_t value, char *buf, uint32_t base) {
 int sprintf(char *buf, const char *format, ...) {
     void* args;
     va_start(args, format);
-    uint8_t ibuf[32];
-    uint8_t j = 0;
+    char ibuf[32];
     uint8_t is_f = 0;
     char *str;
     while (*format) {

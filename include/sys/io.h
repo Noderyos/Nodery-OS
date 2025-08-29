@@ -3,8 +3,6 @@
 
 #include "../types.h"
 
-#define FONT_WIDTH 1
-#define FONT_HEIGHT 16
 typedef enum {
     BLACK = 0xFF0,
     DARK_BLUE = 0xFF00007F,

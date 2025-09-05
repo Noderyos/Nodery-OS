@@ -2,6 +2,7 @@
 #include "sys/ps2.h"
 #include "sys/ports.h"
 #include "sys/keymap.h"
+#include "mmap.h"
 #include "malloc.h"
 #include "sys/io.h"
 #include "io.h"
@@ -107,11 +108,17 @@ int main(void) {
     uint16_t extended_memory = *((uint16_t*)0x804);
     uint32_t available_memory = 1024*(low_memory + upper_memory + extended_memory * 64);
     printf("Memory available : %dKb\n", available_memory / 1024);
-    if(init_malloc(available_memory) < 0){
+    
+    if (init_paging(available_memory)) {
         setColor(RED);
-        puts("Malloc init error");
-        return 0;
+        puts("Cannot init paging");
     }
+
+    if (init_malloc()) {
+        setColor(RED);
+        puts("Cannot init malloc");
+    }
+
     puts("Welcome to");
     setColor(YELLOW);
     puts("NoderyOS");

@@ -279,7 +279,11 @@ uint16_t *lpts = (uint16_t*)0x408;
 void putpixel(uint16_t x, uint16_t y, uint32_t color) {
     uint8_t a = (color>>24) & 0xFF;
     uint32_t where = (y*SCR_WIDTH+x) * 3;
-    uint32_t r = color & 0xFF, g = (color>>8) & 0xFF, b = (color>>16) & 0xFF;
+    
+    uint32_t r = color & 0xFF, 
+             g = (color>>8) & 0xFF, 
+             b = (color>>16) & 0xFF;
+    
     r = vbe->framebuffer[where] * (255-a) + r*a;
     g = vbe->framebuffer[where+1] * (255-a) + g*a;
     b = vbe->framebuffer[where+2] * (255-a) + b*a;

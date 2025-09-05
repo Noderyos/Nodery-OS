@@ -18,17 +18,17 @@ void ui_clear(uint32_t color) {
 }
 
 void ui_rect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color) {
-    for (int16_t cy = y; cy < y+h; cy++)
-        for (int16_t cx = x; cx < x + w; cx++)
+    for (int32_t cy = y; cy < y+h; cy++)
+        for (int32_t cx = x; cx < x + w; cx++)
             if (!oob(cx, cy))
                 putpixel((uint16_t)cx, (uint16_t)cy, color);
 }
 
 void ui_circle(int16_t x, int16_t y, uint16_t r, uint32_t color) {
-    for (int16_t dy = -r; dy < r; dy++) {
-        for (int16_t dx = -r; dx < r; dx++) {
-            int16_t cx = x + dx;
-            int16_t cy = y + dy;
+    for (int32_t dy = -r; dy < r; dy++) {
+        for (int32_t dx = -r; dx < r; dx++) {
+            int32_t cx = x + dx;
+            int32_t cy = y + dy;
             if (!oob(cx, cy))
                 if(dx*dx + dy*dy < r*r)
                     putpixel(cx, cy, color);

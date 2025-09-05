@@ -3,12 +3,7 @@
 
 #include "types.h"
 
-typedef struct {
-    void *start;
-    uint32_t size;
-}malloc_entry;
-
-int init_malloc(unsigned int mem_size);
+int init_malloc();
 void *malloc(unsigned int size);
 void *realloc(void *ptr, unsigned int new_size);
 int free(void *ptr);

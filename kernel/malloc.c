@@ -1,52 +1,50 @@
 #include "malloc.h"
 #include "io.h"
 #include "types.h"
+#include "mmap.h"
 
-#define START_ADDR 0x1000000
-#define MALLOC_ENTRY_COUNT 256
+#define INITIAL_SIZE (16*PAGE_SIZE) // 64k
+#define START_ADDR 0x50000000
 
-uint32_t blob_size;
-malloc_entry *malloc_entries;
-void *malloc_blob;
+typedef struct block {
+    uint32_t size;
+    int free;
+    struct block *next;
+} block_t;
 
-int init_malloc(uint32_t mem_size){
-    if(mem_size < START_ADDR + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT)
-        return -1;
-    malloc_entries = (malloc_entry *)START_ADDR;
-    malloc_blob = (void*)malloc_entries + sizeof(malloc_entry) * MALLOC_ENTRY_COUNT;
-    blob_size = (void*)mem_size - malloc_blob;
-    printf("Malloc entries at 0x%x array at 0x%x of size %dKb\n", malloc_entries, malloc_blob, blob_size/1024);
+block_t *malloc_start;
+void *malloc_end;
 
+int init_malloc(){
+    malloc_start = (block_t *)START_ADDR;
+    malloc_end = malloc_start + INITIAL_SIZE;
+    if (!mmap((uint32_t)malloc_start, INITIAL_SIZE, PAGE_PRESENT | PAGE_RW)) return -1;
+    malloc_start->free = 1;
+    malloc_start->size = INITIAL_SIZE;
+    malloc_start->next = 0;
     return 0;
 }
 
-int find_empty_entry(){
-    for (int i = 0; i < MALLOC_ENTRY_COUNT; ++i) {
-        if(malloc_entries[i].start == 0)
-            return i;
-    }
-    return -1;
-}
+void *malloc_expand(uint32_t size) {
+    uint32_t alligned_size = (size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
 
-
-int find_entry(void *ptr){
-    for (int i = 0; i < MALLOC_ENTRY_COUNT; ++i) {
-        if(malloc_entries[i].start == ptr)
-            return i;
+    for (uint32_t i = 0; i < alligned_size; i += PAGE_SIZE) {
+        void *virt = malloc_end + i;
+        void *phys = alloc_page();
+        if (!phys) return 0;
+        if (!map_page((uint32_t)virt, (uint32_t)phys, PAGE_PRESENT | PAGE_RW)) return 0;
     }
-    return -1;
+    void *old_end = malloc_end;
+    malloc_end += alligned_size;
+    return old_end;
 }
 
 void *realloc(void *ptr, uint32_t new_size){
-    int entry = find_entry(ptr);
-    if(entry == -1)
-        return 0;
-
     void *new_ptr = malloc(new_size);
-    if(!new_ptr)
-        return 0;
+    if(!new_ptr) return 0;
 
-    uint32_t old_size = malloc_entries[entry].size;
+
+    uint32_t old_size = ((block_t *)(ptr-sizeof(block_t)))->size;
     uint32_t size = old_size < new_size ? old_size : new_size;
 
     for (uint32_t i = 0; i < size; ++i)
@@ -56,46 +54,56 @@ void *realloc(void *ptr, uint32_t new_size){
     return new_ptr;
 }
 
-
-int find_up_nearest(void *ptr){
-    void *min_addr = malloc_blob + blob_size;
-    int min = -1;
-    for (int i = 0; i < MALLOC_ENTRY_COUNT; ++i) {
-        if(malloc_entries[i].start >= ptr && malloc_entries[i].start < min_addr){
-            min_addr = malloc_entries[i].start;
-            min = i;
-        }
-    }
-    return min;
-}
-
 void *malloc(uint32_t size){
-    int entry = find_empty_entry();
-    if(entry < 0) return 0;
+    block_t *current = malloc_start;
+    while(current) {
+        if(current->free && current->size >= size) {
+            if (current->size >= size + sizeof(block_t) + 4) { // 4 is a margin
+                block_t *new_block = (block_t *)((uint8_t*)current + sizeof(block_t) + size);
+                new_block->size = current->size - size - sizeof(block_t);
+                new_block->free = 1;
+                new_block->next = current->next;
+                current->next = new_block;
+                current->size = size;
+            }
+            current->free = 0;
+            return (void*)current + sizeof(block_t);
+        }
+        current = current->next;
+    }
+    uint32_t total_size = size + sizeof(block_t);
+    current = malloc_expand(total_size);
+    if (!current) return 0;
 
-    void *cursor = malloc_blob;
+    current->free = 0;
+    current->size = size;
 
-    int near;
-    while ((near = find_up_nearest(cursor)) >= 0                 // Mem allocated after
-            && (uint32_t)(malloc_entries[near].start - cursor) < size // and not enough space
-    ) cursor = malloc_entries[near].start + malloc_entries[near].size;
-
-    // No memory allocated after and not enough space
-    if (near < 0 && cursor + size > malloc_blob + blob_size) return 0;
-
-
-    malloc_entries[entry].start = cursor;
-    malloc_entries[entry].size = size;
-    return cursor;
+    uint32_t leftover = ((uint32_t)malloc_end - (uint32_t)current) - size;
+    if (leftover > sizeof(block_t) + 4) {
+        block_t *next = current + total_size;
+        next->size = leftover - sizeof(block_t);
+        next->free = 1;
+        next->next = 0;
+        current->next = next;
+    } else {
+        current->next = 0;
+    }
+    return (uint8_t*)current + sizeof(block_t);
 }
 
 int free(void *ptr) {
-    for (int i = 0; i < MALLOC_ENTRY_COUNT; ++i) {
-        if(malloc_entries[i].start == ptr){
-            malloc_entries[i].start = 0;
-            malloc_entries[i].size = 0;
-            return 0;
+    if (!ptr) return 0;
+    block_t *block = ptr - sizeof(block_t);
+    block->free = 1;
+
+    block_t *current = malloc_start;
+    while(current && current->next) {
+        if(current->free && current->next->free) {
+            current->size += sizeof(block_t) + current->next->size;
+            current->next = current->next->next;
+        } else {
+            current = current->next;
         }
     }
-    return -1;
+    return 0;
 }

@@ -5,9 +5,35 @@
 
 struct IDT_entry IDT[256];
 
-void int_handle() {
-    puts("\n\nOH NO AN EXCEPTION\n\n");
-    while (1);
+void isr0(), isr1(), isr2(), isr3(), isr4(), isr5(), isr6(), isr7(),
+     isr8(), isr9(), isr10(),isr11(),isr12(),isr13(),isr14(),isr15(),
+     isr16(),isr17(),isr18(),isr19(),isr20(),isr21(),isr22(),isr23(),
+     isr24(),isr25(),isr26(),isr27(),isr28(),isr29(),isr30(),isr31();
+
+void (*exceptions[32])() = {
+    isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7,
+    isr8, isr9, isr10,isr11,isr12,isr13,isr14,isr15,
+    isr16,isr17,isr18,isr19,isr20,isr21,isr22,isr23,
+    isr24,isr25,isr26,isr27,isr28,isr29,isr30,isr31
+};
+
+
+void cpu_exception_handler(
+    struct {
+        uint32_t gs, fs, es, ds;
+        uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+        uint32_t int_no, err_code;
+        uint32_t eip, cs, eflags;
+    }*r) {
+    printf("============ CPU Exception ============\n");
+    printf("INT  : %d  ERR: 0x%x\n", r->int_no, r->err_code);
+    printf("EIP  : 0x%x  EFLAGS: 0x%x\n", r->eip, r->eflags);
+    printf("EAX=0x%x EBX=0x%x ECX=0x%x EDX=0x%x\n", r->eax, r->ebx, r->ecx, r->edx);
+    printf("ESI=0x%x EDI=0x%x EBP=0x%x ESP=0x%x\n", r->esi, r->edi, r->ebp, r->esp);
+    printf("CS=0x%x DS=0x%x ES=0x%x FS=0x%x GS=0x%x\n", r->cs, r->ds, r->es, r->fs, r->gs);
+    printf("========================================\n");
+
+    for(;;) asm volatile("hlt");
 }
 
 void init_idt() {
@@ -30,12 +56,12 @@ void init_idt() {
     IDT[0x2C].offset_upper = ((uint32_t)mouse_handler & 0xFFFF0000) >> 16;
 
 
-    for(int i = 0; i < 0x16; i++) {
+    for(int i = 0; i < 32; i++) {
         IDT[i].segment = 8;
         IDT[i].zero = 0;
         IDT[i].type = 0b10001110;
-        IDT[i].offset_lower = (uint32_t)int_handler & 0xFFFF;
-        IDT[i].offset_upper = ((uint32_t)int_handler & 0xFFFF0000) >> 16;
+        IDT[i].offset_lower = (uint32_t)exceptions[i] & 0xFFFF;
+        IDT[i].offset_upper = ((uint32_t)exceptions[i] & 0xFFFF0000) >> 16;
     }
 
     // Restart PICs

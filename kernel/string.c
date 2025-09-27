@@ -124,12 +124,12 @@ uint32_t strnlen(char *s, uint32_t maxlen) {
 void itoa(int32_t value, char *buf, uint32_t base) {
     int idx = 0;
     uint8_t neg = 0;
-    if (value < 0) {
+    if (value < 0 && base != 16) {
         value = -value;
         buf[idx++] = '-';
         neg = 1;
     }
-    while (value > 0) {
+    while ((uint32_t)value > 0) {
         uint8_t v = value % base;
         if (v < 10) {
             buf[idx] = '0' + v;

@@ -2,7 +2,7 @@
 [org 0x7c00]
 
 BOOT_DISK equ 0x800
-KERNEL_LOCATION equ 0x1000
+KERNEL_LOCATION equ 0x10000
 
 UPPER_MEM equ 0x802
 EXTENDED_MEM equ 0x804
@@ -39,7 +39,9 @@ mov al, 0x25 ; Sector count
 mov ch, 0x0
 mov dh, 0x0
 mov cl, 0x2
-mov bx, KERNEL_LOCATION ; Address
+mov bx, KERNEL_LOCATION/0x10
+mov es, bx
+mov bx, 0 ; Address
 mov dl, [BOOT_DISK]
 int 13h
 

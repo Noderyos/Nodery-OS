@@ -3,3 +3,4 @@ obj
 os.bin
 part.bin
 layout.map
+compile_commands.json

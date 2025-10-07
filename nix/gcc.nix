@@ -9,7 +9,7 @@ pkgs.stdenv.mkDerivation (finalAttrs: {
   version = "14.2.0";
   
   src = pkgs.fetchurl {
-    url = "http://ftp.gnu.org/gnu/gcc/gcc-${finalAttrs.version}/gcc-${finalAttrs.version}.tar.xz";
+    url = "https://mirror.ibcp.fr/pub/gnu/gcc-${finalAttrs.version}/gcc-${finalAttrs.version}.tar.xz";
     sha256 = "sha256-p7Obxpy/niWCbFpgqyZHcAH3wI2FzsBLwOKcq+1vPMk=";
   };
 

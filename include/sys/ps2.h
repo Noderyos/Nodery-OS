@@ -17,6 +17,8 @@ void handle_keyboard();
 void handle_tick();
 void handle_mouse();
 
+extern void syscall_handler();
+
 void init_pit(uint16_t divisor);
 
 #endif

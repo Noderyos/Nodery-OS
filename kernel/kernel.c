@@ -1,7 +1,6 @@
 #include "sys/pic.h"
 #include "sys/ps2.h"
 #include "sys/ports.h"
-#include "sys/keymap.h"
 #include "mmap.h"
 #include "malloc.h"
 #include "sys/io.h"
@@ -12,43 +11,12 @@
 #include "string.h"
 #include "sys/vga.h"
 #include "ui.h"
+#include "syscalls.h"
 
 struct mbr *mbr = (void *)0x7c00;
 
 #define MAX_CMD 1024
 
-int is_shift = 0;
-
-int cmd_len = 0;
-char cmd[MAX_CMD];
-
-void handle_keyboard() {
-    uint8_t status = inb(PS2_COMMAND);
-    if (status & 1) {
-        uint8_t keycode = inb(PS2_DATA);
-        if(keycode == LSHIFT) is_shift = 1;
-        else if(keycode == LSHIFT+0x80) is_shift = 0;
-        else if(keycode == LMAJ) is_shift = !is_shift;
-        else if(keycode == BACKSPACE) {
-            backspace();
-            if(cmd_len) cmd[--cmd_len] = 0;    
-        }
-        else if(keycode == ENTER) {
-            putchar('\n');
-            cmd_len = 0;
-            printf("Unknown command '%s' (ono)\n", cmd);
-            for(int i = 0; i < MAX_CMD; i++) cmd[i] = 0;
-        }
-        else if (keycode < 128) {
-            char c;
-            if(is_shift) c = keymap_maj[keycode];
-            else c = keymap[keycode];
-            putchar(c);
-            if(cmd_len < MAX_CMD-1) cmd[cmd_len++] = c;
-        }
-    }
-    outb(PIC1_COMMAND, 0x20);
-}
 
 uint8_t mouse_packet[3];
 uint8_t mouse_cycle = 0;
@@ -90,13 +58,15 @@ void handle_tick() {
     outb(PIC1_COMMAND, 0x20);
 }
 
+extern int test_syscall();
+
 int main(void) {
     init_idt();
     kb_init();
     mouse_init();
     init_pit(1193182 / 1000);
     mask_interrupts();
-
+    setup_fds();
     enable_interrupts();
 
     if(initSerial(coms[0])) {
@@ -130,6 +100,13 @@ int main(void) {
         return 0;
     }
 
+    uint32_t start = tick_count;
+    test_syscall();
+    uint32_t stop = tick_count;
+
+    printf("Ticks %d\n", stop-start);
+
+    return 0;
     FILE *f = fopen("HELLO.TXT", "r");
     if (!f) {
         printf("Cannot open file\n");

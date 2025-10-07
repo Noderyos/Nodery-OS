@@ -8,7 +8,7 @@ pkgs.stdenv.mkDerivation (finalAttrs: {
   version = "2.43";
 
   src = pkgs.fetchurl {
-    url = "http://ftp.gnu.org/gnu/binutils/binutils-${finalAttrs.version}.tar.xz";
+    url = "https://mirror.ibcp.fr/pub/gnu/binutils/binutils-${finalAttrs.version}.tar.xz";
     sha256 = "sha256-tTYG9EOsjwHR1fycOUl/KvMi2Z4UzqXAtLEk1jA3k2U=";
   };
 

@@ -5,6 +5,7 @@ extern handle_mouse
 extern int_handle
 extern handle_tick
 extern cpu_exception_handler
+extern handle_syscall
 
 global load_idt
 global enable_interrupts
@@ -12,6 +13,7 @@ global keyboard_handler
 global mouse_handler
 global tick_handler
 global int_handler
+global syscall_handler
 
 load_idt:
     mov edx, [esp + 4]
@@ -42,6 +44,19 @@ mouse_handler:
     cld
     call handle_mouse
     popad
+    iretd
+
+ret_val: resb 8
+
+syscall_handler:
+    pushad
+    cld
+    push esp
+    call handle_syscall
+    mov dword[ret_val], eax
+    pop eax
+    popad
+    mov eax, dword[ret_val]
     iretd
 
 %macro ISR_NOERR 2

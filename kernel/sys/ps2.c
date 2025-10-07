@@ -64,6 +64,13 @@ void init_idt() {
         IDT[i].offset_upper = ((uint32_t)exceptions[i] & 0xFFFF0000) >> 16;
     }
 
+    IDT[0x69].segment = 8;
+    IDT[0x69].zero = 0;
+    IDT[0x69].type = 0b10001110;
+    IDT[0x69].offset_lower = (uint32_t)syscall_handler & 0xFFFF;
+    IDT[0x69].offset_upper = ((uint32_t)syscall_handler & 0xFFFF0000) >> 16;
+
+
     // Restart PICs
     outb(PIC1_COMMAND, 0x11); 
     outb(PIC2_COMMAND, 0x11); 

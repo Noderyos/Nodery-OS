@@ -65,8 +65,8 @@ int map_page(uint32_t phys_addr, uint32_t virt_addr, uint32_t flags) {
 void *mmap(uint32_t virt_addr, uint32_t len, int flags) {
     for (uint32_t i = 0; i < len; i+= PAGE_SIZE) {
         uint32_t phys = (uint32_t)alloc_page();
-        if (!phys) return 0;
-        if (map_page(phys, virt_addr + i, flags) < 0) return 0;
+        if (!phys) return (void *)-1;
+        if (map_page(phys, virt_addr + i, flags) < 0) return (void *)-1;
     }
     return (void *)virt_addr;
 }

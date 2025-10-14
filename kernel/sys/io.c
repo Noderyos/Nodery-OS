@@ -321,7 +321,7 @@ int scr_y = 0;
 TermColor color = WHITE;
 
 void swipeTerm() {
-    memcpy(vbe->framebuffer, &vbe->framebuffer[(SCR_WIDTH*3)*FONT_HEIGHT], SCR_WIDTH*SCR_HEIGHT*3);
+    memcpy(vbe->framebuffer, &vbe->framebuffer[(SCR_WIDTH*3)*FONT_HEIGHT], SCR_WIDTH*(SCR_HEIGHT-FONT_HEIGHT)*3);
     memset(&vbe->framebuffer[(scr_y*SCR_WIDTH+scr_x) * 3], 0, SCR_WIDTH*FONT_HEIGHT*3);
 }
 

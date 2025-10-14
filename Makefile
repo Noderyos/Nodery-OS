@@ -16,6 +16,7 @@ C_SRCS= \
 	kernel/syscalls.c \
     kernel/mmap.c \
     kernel/malloc.c \
+    kernel/elf.c \
     kernel/sys/ps2.c \
     kernel/sys/vga.c \
 	kernel/sys/io.c

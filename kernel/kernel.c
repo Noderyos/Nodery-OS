@@ -11,6 +11,7 @@
 #include "string.h"
 #include "sys/vga.h"
 #include "ui.h"
+#include "elf.h"
 #include "syscalls.h"
 
 struct mbr *mbr = (void *)0x7c00;
@@ -100,11 +101,7 @@ int main(void) {
         return 0;
     }
 
-    uint32_t start = tick_count;
-    test_syscall();
-    uint32_t stop = tick_count;
-
-    printf("Ticks %d\n", stop-start);
+    load_elf("HELLOC.ELF");
 
     return 0;
     FILE *f = fopen("HELLO.TXT", "r");

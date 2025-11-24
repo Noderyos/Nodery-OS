@@ -35,7 +35,7 @@ int 10h
 
 ; Read disk
 mov ah, 0x2
-mov al, 0x30 ; Sector count
+mov al, 0x32 ; Sector count
 mov ch, 0x0
 mov dh, 0x0
 mov cl, 0x2

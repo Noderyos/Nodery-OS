@@ -49,11 +49,17 @@ struct fat_dir_entry {
 
 uint16_t *fat;
 
-struct fat_dir_entry *root_entries;
+struct {
+    uint32_t depth;
+    uint32_t cluster;
+} folder;
 
 uint32_t data_addr;
 
 uint32_t bytes_per_cluster;
+
+uint32_t fat_addr = 0;
+uint32_t root_entries_addr = 0;
 
 void clean_entry(struct fat_dir_entry *entry) {
     for (int i = 0; i < 8; i++)
@@ -67,17 +73,16 @@ int init_fs(uint32_t start_sector) {
     if (!bs.code_jump[0]) return -1;
     if (bs.bytes_per_sector != 512) return -2;
 
-    uint32_t fat_addr = start_sector + bs.resv_sectors;
+    fat_addr = start_sector + bs.resv_sectors;
     fat = malloc(bs.sectors_per_fat * bs.bytes_per_sector);
     ata_lba_read(fat_addr, bs.sectors_per_fat, fat);
 
-    uint32_t root_entries_addr = fat_addr + bs.sectors_per_fat * bs.fat_count;
-    root_entries = malloc(bs.root_entry_count * sizeof(struct fat_dir_entry));
-    ata_lba_read(root_entries_addr, (bs.root_entry_count * sizeof(struct fat_dir_entry))/512, root_entries);
-
+    root_entries_addr = fat_addr + bs.sectors_per_fat * bs.fat_count;
+    folder.depth = 0;
+    folder.cluster = 0;
+    
     data_addr = root_entries_addr + (bs.root_entry_count * sizeof(struct fat_dir_entry))/512;
     bytes_per_cluster = bs.sectors_per_cluster * bs.bytes_per_sector;
-    for (int i = 0; i < bs.root_entry_count; i++) clean_entry(&root_entries[i]);
 
     return 0;
 }
@@ -91,40 +96,6 @@ void format_entry(struct fat_dir_entry entry, char buf[13]) {
     strncat(buf, entry.extension, 3);
 }
 
-int read_file(char *filename) {
-    char fname[13];
-    int idx = -1;
-    for (int i = 0; i < 5; i++) {
-        struct fat_dir_entry entry = root_entries[i];
-        format_entry(entry, fname);
-        
-        if (strcmp(fname, filename) == 0 && !entry.attr.Directory) {
-            idx  = i;
-            break;
-        }
-    }
-    if (idx < 0) return -1;
-
-    uint16_t cur_cluster = root_entries[idx].cluster;
-    uint32_t filesize = root_entries[idx].filesize;
-
-    uint8_t *buf = malloc(bs.sectors_per_cluster * bs.bytes_per_sector);
-    if (!buf) return -1;
-
-    while (cur_cluster != 0xFFFF) {
-        ata_lba_read(data_addr + (cur_cluster-2)*bs.sectors_per_cluster, bs.sectors_per_cluster, buf);
-        uint32_t to_read = filesize > bytes_per_cluster ? bytes_per_cluster : filesize;
-        
-        for (uint32_t i = 0; i < to_read; i++) printf("%c", buf[i]);
-        
-        cur_cluster = fat[cur_cluster];
-        filesize -= bytes_per_cluster;
-    }
-
-    free(buf);
-    return 0;
-}
-
 void format_attrs(struct fat_attr attrs, char *buf) {
     buf[0] = attrs.ReadOnly ? 'R' : '-';
     buf[1] = attrs.Hidden   ? 'H' : '-';
@@ -136,45 +107,95 @@ void format_attrs(struct fat_attr attrs, char *buf) {
     buf[7] = attrs.Reserved &0b10 ? 'y' : '-';
 }
 
-int list_dir() {
+void display_entry(struct fat_dir_entry entry) {
     char attrs[9];
-    for (int i = 0; i < bs.root_entry_count; i++) {
-        struct fat_dir_entry entry = root_entries[i];
-        if (entry.filename[0] == 0) break;
-        format_attrs(entry.attr, attrs);
+    format_attrs(entry.attr, attrs);
 
-        printf(
-                entry.attr.Directory || *entry.extension == 0
-                    ? "%s %d-%d-%d %d:%d:%d %s\n"
-                    : "%s %d-%d-%d %d:%d:%d %s.%s\n",
-                attrs,
-                entry.c_date.Year + 1980, entry.c_date.Month, entry.c_date.Day,
-                entry.c_time.Hour, entry.c_time.Minute, entry.c_time.Second*2, 
-                entry.filename, entry.extension);
- 
+    printf(
+            entry.attr.Directory || *entry.extension == 0
+            ? "%s %d-%d-%d %d:%d:%d %s\n"
+            : "%s %d-%d-%d %d:%d:%d %s.%s\n",
+            attrs,
+            entry.c_date.Year + 1980, entry.c_date.Month, entry.c_date.Day,
+            entry.c_time.Hour, entry.c_time.Minute, entry.c_time.Second*2, 
+            entry.filename, entry.extension); 
+}
+
+int find_entry(char *name, struct fat_dir_entry *out_entry) {
+    int idx = -1;
+
+    struct fat_dir_entry *entries;
+    char fname[13];
+
+    if (folder.depth == 0) {
+        entries = malloc(bs.root_entry_count * sizeof(struct fat_dir_entry));
+        ata_lba_read(root_entries_addr, (bs.root_entry_count * sizeof(struct fat_dir_entry))/512, entries);
+        for (int i = 0; i < bs.root_entry_count; i++) {
+            struct fat_dir_entry entry = entries[i];
+            clean_entry(&entry);
+            format_entry(entry, fname);
+            if (strcmp(fname, name) == 0) {
+                idx = i;
+                break;
+            }
+        }
+    } else {
+        if (folder.cluster == 0) {
+            setColor(RED);
+            printf("[ERROR] Cannot load directory");
+            return -1;
+        }
+
+        uint32_t cluster = folder.cluster;
+        for (; cluster != 0xFFFF; cluster = fat[cluster]) {
+            entries = malloc(bytes_per_cluster);
+            ata_lba_read(data_addr + (cluster-2)*bs.sectors_per_cluster, bs.sectors_per_cluster, entries);
+            for (int i = 0; i < bytes_per_cluster/sizeof(*entries); i++) {
+                struct fat_dir_entry entry = entries[i];
+                clean_entry(&entry);
+                format_entry(entry, fname);
+                if (strcmp(fname, name) == 0) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx >= 0) break;
+        }
     }
+    if (idx < 0) return -1;
+    memcpy(out_entry, &entries[idx], sizeof(*out_entry));
     return 0;
 }
 
+int chdir(char *dirname) {
+    struct fat_dir_entry entry;
+
+    if (folder.depth == 0 && (strcmp(dirname, "..") == 0 || strcmp(dirname, ".") == 0)) {
+        return 0;
+    }
+
+    if (find_entry(dirname, &entry) < 0) return -1;
+    if (!entry.attr.Directory) return -1;
+    if (strcmp(dirname, "..") == 0) folder.depth--;
+    else if (strcmp(dirname, ".") != 0) folder.depth++;
+    
+    folder.cluster = entry.cluster;
+    if (folder.cluster == 0) folder.depth = 0;
+
+    return 0;
+}
+
+
 FILE *fopen(char *path, char *mode) {
     (void)mode;
-
-    char fname[13];
-    int idx = -1;
-    for (int i = 0; i < 5; i++) {
-        struct fat_dir_entry entry = root_entries[i];
-        format_entry(entry, fname);
-        
-        if (strcmp(fname, path) == 0 && !entry.attr.Directory) {
-            idx  = i;
-            break;
-        }
-    }
-    if (idx < 0) return 0;
+    
+    struct fat_dir_entry entry;
+    if (find_entry(path, &entry) < 0) return NULL;
+    if (entry.attr.Directory) return NULL;
 
     FILE *file = malloc(sizeof(FILE));
-    file->cluster = root_entries[idx].cluster;
-    file->filesize = root_entries[idx].filesize;
+    file->cluster = entry.cluster;
+    file->filesize = entry.filesize;
     file->offset = 0;
 
     return file;

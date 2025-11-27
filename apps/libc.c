@@ -51,3 +51,14 @@ int close(int fildes) {
     return ret;
 }
 
+int exit(int exit_code) {
+    int ret;
+    asm volatile (
+        "int $0x69"
+        : "=a"(ret)
+        : "a"(1), "b"(exit_code)
+        : "memory"
+    );
+    return ret;
+}
+

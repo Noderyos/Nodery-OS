@@ -21,5 +21,11 @@
 | Name               | Start      | End        | Size      |
 |--------------------|------------|------------|-----------|
 | Identity mapping   | 0x0        | 0x400000   | 4 Mbytes  |
-| Malloc memory      | 0x50000000 | 0x??       | ?? bytes  |
+| Malloc memory      | 0xE0000000 | 0x10000000 | 256 Mbytes|
 | Page Dir/Tbl       | 0xFFC00000 | -          | 4 Mbytes  |
+
+## Program virtual memory
+| Name               | Start      | End        | Size      |
+|--------------------|------------|------------|-----------|
+| Stack              | 0xD0000000 | 0xD0001000 | 4 kbytes  |
+| ELF content        | 0x08048000 | 0x??       | ?? bytes  |

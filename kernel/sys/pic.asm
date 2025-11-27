@@ -15,6 +15,9 @@ global tick_handler
 global int_handler
 global syscall_handler
 
+extern scheduler
+extern current_task
+
 load_idt:
     mov edx, [esp + 4]
     lidt [edx]
@@ -25,11 +28,30 @@ enable_interrupts:
     ret
 
 tick_handler:
-    pushad
-    cld
+    pusha
+    mov eax, [current_task]
+    mov [eax], esp
+
     call handle_tick
-    popad
+    call scheduler
+
+    mov eax, [current_task]
+    mov esp, [eax]
+
+    mov ecx, [eax+4]
+    mov cr3, ecx
+
+    popa
     iretd
+
+   
+
+;tick_handler:
+;    pushad
+;    cld
+;    call handle_tick
+;    popad
+;    iretd
 
 
 keyboard_handler:
@@ -46,7 +68,7 @@ mouse_handler:
     popad
     iretd
 
-ret_val: resb 8
+ret_val: dd 0
 
 syscall_handler:
     pushad

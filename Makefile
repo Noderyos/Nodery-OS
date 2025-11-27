@@ -2,23 +2,24 @@ AS=nasm
 CC=i386-elf-gcc
 LD=i386-elf-ld
 
-CFLAGS=-Wall -Wextra -Iinclude -nolibc -nostdlib -ffreestanding -fpack-struct
+CFLAGS=-Wall -Wextra -Wno-packed-bitfield-compat -Iinclude -nolibc -nostdlib -ffreestanding -fpack-struct
 LDFLAGS=-T linker.ld --oformat binary -Map=layout.map
 
 OBJDIR=obj
 C_SRCS= \
-    kernel/kernel.c \
-    kernel/io.c \
+	kernel/kernel.c \
+	kernel/io.c \
 	kernel/string.c \
 	kernel/sys/lba.c \
 	kernel/fat.c \
 	kernel/ui.c \
 	kernel/syscalls.c \
-    kernel/mmap.c \
-    kernel/malloc.c \
-    kernel/elf.c \
-    kernel/sys/ps2.c \
-    kernel/sys/vga.c \
+	kernel/mmap.c \
+	kernel/malloc.c \
+	kernel/elf.c \
+	kernel/scheduler.c \
+	kernel/sys/ps2.c \
+	kernel/sys/vga.c \
 	kernel/sys/io.c
 
 ASM_SRCS= \

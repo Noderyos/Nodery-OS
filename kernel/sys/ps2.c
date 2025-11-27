@@ -17,14 +17,14 @@ void (*exceptions[32])() = {
     isr24,isr25,isr26,isr27,isr28,isr29,isr30,isr31
 };
 
+struct exception_stack {
+    uint32_t gs, fs, es, ds;
+    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    uint32_t int_no, err_code;
+    uint32_t eip, cs, eflags;
+};
 
-void cpu_exception_handler(
-    struct {
-        uint32_t gs, fs, es, ds;
-        uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
-        uint32_t int_no, err_code;
-        uint32_t eip, cs, eflags;
-    }*r) {
+void cpu_exception_handler(struct exception_stack *r) {
     printf("============ CPU Exception ============\n");
     printf("INT  : %d  ERR: 0x%x\n", r->int_no, r->err_code);
     printf("EIP  : 0x%x  EFLAGS: 0x%x\n", r->eip, r->eflags);

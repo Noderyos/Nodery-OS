@@ -3,6 +3,7 @@
 #include "sys/ports.h"
 #include "mmap.h"
 #include "malloc.h"
+#include "scheduler.h"
 #include "sys/io.h"
 #include "io.h"
 #include "sys/lba.h"
@@ -59,19 +60,27 @@ void handle_tick() {
     outb(PIC1_COMMAND, 0x20);
 }
 
-extern int test_syscall();
-
 int main(void) {
     init_idt();
     kb_init();
     mouse_init();
+    if(init_multitasking() < 0) {
+        setColor(RED);
+        printf("ERROR: Failed to init multitasking\n");
+        return 1;
+    }
     init_pit(1193182 / 1000);
     mask_interrupts();
-    setup_fds();
+    if (setup_fds() < 0) {
+        setColor(RED);
+        printf("ERROR: Failed to init FDs\n");
+        return 1;
+    }
     enable_interrupts();
-
     if(initSerial(coms[0])) {
-        printf("ERROR : Failed to initialize serial port");
+        setColor(RED);
+        printf("ERROR : Failed to initialize serial port\n");
+        return 1;
     }
 
     uint16_t low_memory = 1024;
@@ -92,18 +101,21 @@ int main(void) {
 
     puts("Welcome to");
     setColor(YELLOW);
+
     puts("NoderyOS");
     setColor(WHITE);
 
     if (init_fs(mbr->parts[0].lba_start) < 0) {
         setColor(RED);
         printf("Cannot init FS\n");
-        return 0;
+        return 1;
     }
 
-    load_elf("HELLOC.ELF");
-
-    return 0;
+    if (load_elf("HELLOC.ELF") < 0) {
+        setColor(RED);
+        printf("Cannot load ELF\n");
+        return 1;
+    }
     FILE *f = fopen("HELLO.TXT", "r");
     if (!f) {
         printf("Cannot open file\n");
@@ -121,11 +133,10 @@ int main(void) {
     fseek(f, 0, SEEK_SET);
     i = fread(buf, 1, 32, f);
     printf("%d '%s'\n", i, buf);
-
+    return 0;
     ui_clear(ui_rgb(254, 0, 0));
     ui_rect(40, 60, 70, 30, ui_rgba(0, 255, 0, 128));
     ui_circle(400, 300, 20, ui_rgb(0, 0, 255));
     ui_line(10, 10, 50, 30, ui_rgb(255, 255, 0));
     ui_triangle(246, 98, 72, 400, 542, 57, ui_rgb(255, 0, 255));
-
 }

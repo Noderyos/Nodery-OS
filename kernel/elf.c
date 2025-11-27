@@ -5,6 +5,9 @@
 #include "string.h"
 #include "malloc.h"
 #include "mmap.h"
+#include "scheduler.h"
+
+#include "sys/vga.h"
 
 #define ERROR(x) \
     do { \
@@ -29,12 +32,12 @@ int parse_elf_header(FILE *f, Elf32_Ehdr *elf_hdr) {
     }
     
     if (elf_hdr->e_ident[4] != ELFCLASS32) {
-        ERROR("[ERROR] Invalid ELF wordsize");
+        ERROR("Invalid ELF wordsize");
         return -1;
     }
 
     if (elf_hdr->e_ident[5] != ELFDATA2LSB) {
-        ERROR("Pas le bon endian");
+        ERROR("Invalid ELF endianness");
         return -1;
     }
 
@@ -59,11 +62,11 @@ int parse_elf_header(FILE *f, Elf32_Ehdr *elf_hdr) {
     }
 
     if (elf_hdr->e_shentsize != sizeof(Elf32_Shdr)) {
-        ERROR("Invalid Section header size");
+        ERROR("Invalid ELF section header size");
         return -1;
     }
     if (elf_hdr->e_phentsize != sizeof(Elf32_Phdr)) {
-        ERROR("Invalid Program header size");
+        ERROR("Invalid ELF program header size");
         return -1;
     }
     return 0;
@@ -93,36 +96,18 @@ int load_elf(char *filename) {
     Elf32_Ehdr elf_hdr = {0};
     if (parse_elf_header(f, &elf_hdr) < 0) return -1;
 
-/*
-    char *str_table = load_str_table(f, elf_hdr);
-    if (str_table == NULL) return -1;
-
-    fseek(f, elf_hdr.e_shoff, SEEK_SET);
-    for (int s_idx = 0; s_idx < elf_hdr.e_shnum; s_idx++) {
-        Elf32_Shdr section = {0};
-        
-        fseek(f, elf_hdr.e_shoff + s_idx*sizeof(Elf32_Shdr), SEEK_SET);
-        fread(&section, sizeof(section), 1, f);
-        if (s_idx == 0) {
-            if (section.sh_type != SHT_NULL) {
-                ERROR("Unexpected section");
-                free(str_table);
-                return -1;
-            }
-            continue;
-        }
-        printf("[DEBUG] Section %s, Offset %x, Size %d\n", &str_table[section.sh_name], section.sh_offset, section.sh_size);
-    }
-    free(str_table);
-*/
-
+    uint32_t *task_pd_phys = create_pd();
+    uint32_t *task_pd = (uint32_t*)0xF0000000;
+    if (map_page(PD_ADDR, task_pd_phys, task_pd, PAGE_DEFAULT) < 0) return -1;
+    
     fseek(f, elf_hdr.e_phoff, SEEK_SET);
     for (int p_idx = 0; p_idx < elf_hdr.e_phnum; p_idx++) {
         Elf32_Phdr prog = {0};
         fseek(f, elf_hdr.e_phoff + p_idx*sizeof(Elf32_Phdr), SEEK_SET);
         fread(&prog, sizeof(prog), 1, f);
 
-        printf("[DEBUG] Ptype = %d, Virt %x, Fsize %d, Msize %d, Align %x\n", prog.p_type, prog.p_vaddr, prog.p_filesz, prog.p_memsz, prog.p_align);        
+        printf("[DEBUG] Ptype = %d, Virt %x, Fsize %d, Msize %d, Align %x\n", 
+                prog.p_type, prog.p_vaddr, prog.p_filesz, prog.p_memsz, prog.p_align);        
         
         if (prog.p_type == PT_NULL) continue;
         if (prog.p_type == PT_DYNAMIC || prog.p_type == PT_INTERP) {
@@ -142,23 +127,37 @@ int load_elf(char *filename) {
         }
 
         uint32_t virt_addr = prog.p_vaddr & ~(PAGE_SIZE-1);
-        if (mmap(virt_addr, prog.p_offset + prog.p_memsz, PAGE_USER | PAGE_RW) < 0) {
+        uint32_t p_len = prog.p_offset + prog.p_memsz;
+        if (mmap(PD_ADDR, (void*)virt_addr, p_len, PAGE_USER | PAGE_RW) == NULL ||
+            mmap(task_pd, (void*)virt_addr, p_len, PAGE_USER | PAGE_RW) == NULL) {
             ERROR("Cannot mmap");
             return -1;
         }
+
         if (prog.p_filesz) {
             fseek(f, prog.p_offset, SEEK_SET);
             fread((void *)prog.p_vaddr, 1, prog.p_filesz, f);
         } else {
             memset((void *)prog.p_vaddr, 0, prog.p_memsz);
         }
-    } 
 
-    printf("[DEBUG] Jumping to %x\n", elf_hdr.e_entry);
-    int (*ret)() = (int(*)())elf_hdr.e_entry;
-    ret();
 
-    printf("[DEBUG] Returned from ELF");
+        for (uint32_t da = 0; da <= p_len; da += PAGE_SIZE) {
+            uint32_t addr = virt_addr + da;
+            uint32_t pd_index = (addr >> 22) & 0x3FF;
+            uint32_t pt_index = (addr >> 12) & 0x3FF;
+ 
+            uint32_t *pt_phys = (uint32_t*)task_pd[pd_index];
+            uint32_t *pt = (uint32_t*)0xF0002000;
+            if (map_page(PD_ADDR, pt_phys, pt, PAGE_DEFAULT) < 0) return -1;
+
+            void *page = (void*)0xF0003000;
+            if (map_page(PD_ADDR, (uint32_t *)(pt[pt_index] & 0xFFFFF000), page, PAGE_DEFAULT) < 0) return -1;
+            memcpy((uint32_t*)0xF0003000, (uint32_t*)addr, PAGE_SIZE);
+        }
+    }
+
+    if (create_task(task_pd_phys, (void*)elf_hdr.e_entry) < 0) return -1;
 
     fclose(f);
     return 0;

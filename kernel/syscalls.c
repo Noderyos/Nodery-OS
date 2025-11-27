@@ -6,6 +6,7 @@
 #include "sys/keymap.h"
 #include "fat.h"
 #include "mmap.h"
+#include "scheduler.h"
 
 int is_shift = 0;
 
@@ -124,9 +125,17 @@ int setup_fds() {
 }
 
 uint32_t handle_syscall(regs_t *r) {
-    asm volatile("sti");
     switch (r->eax) {
+        case 1: { // exit
+            uint32_t code = r->ebx;
+            // TODO: Switch thread
+            printf("Exited code %d\n", code);
+            exit_task();
+            asm("int $0x20");
+            return 0;
+        };break;
         case 3: { // read
+            asm volatile("sti");
             uint32_t fd = r->ebx;
             if (!fds[fd].present) break;
             if (fds[fd].read == NULL) break;
@@ -193,10 +202,7 @@ uint32_t handle_syscall(regs_t *r) {
             return new_fd;
         };break;
         case 0x5a: { // mmap
-            return (uint32_t)mmap(r->ebx, r->ecx, r->esi);
-        };break;
-        case 1: {
-            putpixel(r->ebx, r->ecx, r->edx);
+            return (uint32_t)mmap(PD_ADDR, (void*)r->ebx, r->ecx, r->esi);
         };break;
     }
     return -1;

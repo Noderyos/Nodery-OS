@@ -9,26 +9,25 @@ uint32_t MAX_PAGES;
 uint8_t *memory_bitmap = (uint8_t *)0x60000;
 uint32_t *page_directory = (uint32_t *)0x80000;
 
-#define PD_ADDR 0xFFFFF000
-#define PT_ADDR 0xFFC00000
-
+static uint32_t current_idx = 0;
 
 void set_page_used(uint32_t page_idx) {
     memory_bitmap[page_idx/8] |= 1<<(page_idx%8);
+    current_idx = page_idx/8;
 }
 
 int is_page_used(uint32_t page_idx) {
     return memory_bitmap[page_idx/8] & 1<<(page_idx%8);
 }
 
+
 void *alloc_page() {
-    for(uint32_t i = 0; i < MAX_PAGES; i++) {
+    for(uint32_t i = current_idx*8; i < MAX_PAGES; i++) {
         if (!is_page_used(i)) {
             set_page_used(i);
             return (void *)(ALLOC_START + i*PAGE_SIZE);
         }
     }
-    printf("Failes\n");
     return 0;
 }
 
@@ -37,36 +36,44 @@ uint32_t *get_page_directory() {
     return (uint32_t*)PD_ADDR;
 }
 
-uint32_t *get_page_table(uint16_t page_idx) {
-    return (uint32_t *)(PT_ADDR + page_idx * PAGE_SIZE);
+uint32_t *get_page_table(uint32_t *pd, uint16_t page_idx) {
+    if (pd == PD_ADDR) {
+        return (uint32_t *)(((uint32_t)PT_ADDR) + page_idx * PAGE_SIZE);
+    }
+    else {
+        if (map_page(PD_ADDR, (void*)(pd[page_idx]&0xFFFFF000), (void*)0xF0001000, PAGE_DEFAULT) < 0) return NULL;
+        return (uint32_t*)0xF0001000;
+    }
 }
 
-int map_page(uint32_t phys_addr, uint32_t virt_addr, uint32_t flags) {
-    uint32_t pd_index = (virt_addr >> 22) & 0x3FF;
-    uint32_t pt_index = (virt_addr >> 12) & 0x3FF;
-
-    uint32_t *pd = get_page_directory();
-    uint32_t *pt = get_page_table(pd_index);
+int map_page(uint32_t *pd, void *phys_addr, void *virt_addr, uint32_t flags) {
+    uint32_t pd_index = ((uint32_t)virt_addr >> 22) & 0x3FF;
+    uint32_t pt_index = ((uint32_t)virt_addr >> 12) & 0x3FF; 
+    uint32_t *pt;
 
     if (!(pd[pd_index] & PAGE_PRESENT)) {
         uint32_t *phys = alloc_page();
         if (!phys) return -1;
         pd[pd_index] = (uint32_t)phys | (flags & 0xFFF);
-        pt = get_page_table(pd_index);
+        pt = get_page_table(pd, pd_index);
         memset(pt, 0, PAGE_SIZE);
+    } else {
+        pt = get_page_table(pd, pd_index);
     }
 
-    pt[pt_index] = (phys_addr & 0xFFFFF000) | (flags & 0xFFF);
+    if (pt == NULL) return -1;
+
+    pt[pt_index] = ((uint32_t)phys_addr & 0xFFFFF000) | (flags & 0xFFF);
  
-    asm volatile("invlpg (%0)" :: "r"(virt_addr) : "memory");
+    if (pd == PD_ADDR) asm volatile("invlpg (%0)" :: "r"(virt_addr) : "memory");
     return 0;
 }
 
-void *mmap(uint32_t virt_addr, uint32_t len, int flags) {
+void *mmap(uint32_t *pd, void *virt_addr, uint32_t len, int flags) {
     for (uint32_t i = 0; i < len; i+= PAGE_SIZE) {
-        uint32_t phys = (uint32_t)alloc_page();
-        if (!phys) return (void *)-1;
-        if (map_page(phys, virt_addr + i, flags | PAGE_PRESENT) < 0) return (void *)-1;
+        void *phys = alloc_page();
+        if (!phys) return NULL;
+        if (map_page(pd, phys, virt_addr + i, flags | PAGE_PRESENT) < 0) return NULL;
     }
     return (void *)virt_addr;
 }
@@ -81,11 +88,10 @@ int init_paging(uint32_t available_memory) {
     memset(first_pt, 0, PAGE_SIZE);
     
     for (uint32_t i = 0; i < 1024; i++)
-        first_pt[i] = (i * PAGE_SIZE) | PAGE_PRESENT | PAGE_RW;
+        first_pt[i] = (i * PAGE_SIZE) | PAGE_DEFAULT;
 
-    page_directory[0] = (uint32_t)first_pt | PAGE_PRESENT | PAGE_RW;
-    page_directory[1023] = (uint32_t)page_directory | PAGE_PRESENT | PAGE_RW;
-
+    page_directory[0] = (uint32_t)first_pt | PAGE_DEFAULT;
+    page_directory[1023] = (uint32_t)page_directory | PAGE_DEFAULT;
     // Load page_directory
     asm volatile("mov %0, %%cr3" :: "r"(page_directory));
 
@@ -96,9 +102,14 @@ int init_paging(uint32_t available_memory) {
     asm volatile("mov %0, %%cr0" :: "r"(cr0));
     
     for (uint32_t i = 0; i < vbe->width*vbe->height*(vbe->bpp/8); i += PAGE_SIZE) {
-        uint32_t a = ((uint32_t)vbe->framebuffer&0xFFFFF000) + i;
-        if(map_page(a, a, PAGE_RW | PAGE_PRESENT) < 0) return -1;
+        void* a = (void*)((uint32_t)vbe->framebuffer&0xFFFFF000) + i;
+        if(map_page(PD_ADDR, a, a, PAGE_DEFAULT) < 0) return -1;
     } 
+
+    for (int i = 0; i < 0x10000000; i += PAGE_SIZE) {
+        void *p = alloc_page();
+        map_page(PD_ADDR, p, (void*)(0xE0000000+i), PAGE_DEFAULT);
+    }
 
     return 0;
 }

@@ -3,8 +3,9 @@
 #include "types.h"
 #include "mmap.h"
 
-#define INITIAL_SIZE (16*PAGE_SIZE) // 64k
-#define START_ADDR 0x50000000
+//#define INITIAL_SIZE (16*PAGE_SIZE) // 64k
+#define INITIAL_SIZE 0x10000000 // 256M
+#define START_ADDR 0xE0000000
 
 typedef struct block {
     uint32_t size;
@@ -18,7 +19,7 @@ void *malloc_end;
 int init_malloc(){
     malloc_start = (block_t *)START_ADDR;
     malloc_end = malloc_start + INITIAL_SIZE;
-    if (!mmap((uint32_t)malloc_start, INITIAL_SIZE, PAGE_PRESENT | PAGE_RW)) return -1;
+    //if (mmap(PD_ADDR, malloc_start, INITIAL_SIZE, PAGE_RW) == NULL) return -1;
     malloc_start->free = 1;
     malloc_start->size = INITIAL_SIZE;
     malloc_start->next = 0;
@@ -32,7 +33,7 @@ void *malloc_expand(uint32_t size) {
         void *virt = malloc_end + i;
         void *phys = alloc_page();
         if (!phys) return 0;
-        if (!map_page((uint32_t)virt, (uint32_t)phys, PAGE_PRESENT | PAGE_RW)) return 0;
+        if (!map_page(PD_ADDR, virt, phys, PAGE_DEFAULT)) return 0;
     }
     void *old_end = malloc_end;
     malloc_end += alligned_size;
@@ -71,6 +72,7 @@ void *malloc(uint32_t size){
         }
         current = current->next;
     }
+    /*
     uint32_t total_size = size + sizeof(block_t);
     current = malloc_expand(total_size);
     if (!current) return 0;
@@ -89,6 +91,8 @@ void *malloc(uint32_t size){
         current->next = 0;
     }
     return (uint8_t*)current + sizeof(block_t);
+    */
+    return NULL;
 }
 
 int free(void *ptr) {

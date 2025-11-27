@@ -3,7 +3,7 @@
 #define ATA_PRIMARY 0x1F0
 
 void ata_lba_read(uint32_t sector, uint8_t count, void *buf) {
-
+    asm("cli");
 
     
     /*
@@ -31,9 +31,11 @@ Send the "READ SECTORS" command (0x20) to port 0x1F7: outb(0x1F7, 0x20)
             *(uint16_t*)buf = inw(ATA_PRIMARY);
         }
     }
+    asm("sti");
 }
 
 void ata_lba_write(uint32_t sector, uint8_t count, void *buf) {
+    asm("cli");
     while(inb(ATA_PRIMARY+7) & 0x80);
 
     outb(ATA_PRIMARY+1, 0x00);
@@ -50,5 +52,6 @@ void ata_lba_write(uint32_t sector, uint8_t count, void *buf) {
             outw(ATA_PRIMARY, *(uint16_t*)buf);
         }
     }
+    asm("sti");
 }
 

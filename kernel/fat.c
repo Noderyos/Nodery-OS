@@ -150,7 +150,7 @@ int find_entry(char *name, struct fat_dir_entry *out_entry) {
         for (; cluster != 0xFFFF; cluster = fat[cluster]) {
             entries = malloc(bytes_per_cluster);
             ata_lba_read(data_addr + (cluster-2)*bs.sectors_per_cluster, bs.sectors_per_cluster, entries);
-            for (int i = 0; i < bytes_per_cluster/sizeof(*entries); i++) {
+            for (uint32_t i = 0; i < bytes_per_cluster/sizeof(*entries); i++) {
                 struct fat_dir_entry entry = entries[i];
                 clean_entry(&entry);
                 format_entry(entry, fname);

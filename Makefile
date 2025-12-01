@@ -10,7 +10,6 @@ C_SRCS= \
 	kernel/kernel.c \
 	kernel/io.c \
 	kernel/string.c \
-	kernel/sys/lba.c \
 	kernel/fat.c \
 	kernel/ui.c \
 	kernel/syscalls.c \
@@ -18,6 +17,8 @@ C_SRCS= \
 	kernel/malloc.c \
 	kernel/elf.c \
 	kernel/scheduler.c \
+	kernel/sys/longlong.c \
+	kernel/sys/lba.c \
 	kernel/sys/ps2.c \
 	kernel/sys/vga.c \
 	kernel/sys/io.c

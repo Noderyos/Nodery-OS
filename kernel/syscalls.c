@@ -65,10 +65,12 @@ uint32_t write(FILE *f, uint8_t *buf, uint32_t len) {
 
 uint32_t error(FILE *f, uint8_t *buf, uint32_t len) {
     (void)f;
-    setColor(RED);
+
+    uint32_t old_color = get_term_color();
+    set_term_color(RED);
     uint32_t tmp = len;
     while (tmp--) putchar(*buf++);
-    setColor(WHITE);
+    set_term_color(old_color);
     return len;
 }
 

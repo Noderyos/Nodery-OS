@@ -65,20 +65,20 @@ int main(void) {
     kb_init();
     mouse_init();
     if(init_multitasking() < 0) {
-        setColor(RED);
+        set_term_color(RED);
         printf("ERROR: Failed to init multitasking\n");
         return 1;
     }
     init_pit(1193182 / 1000);
     mask_interrupts();
     if (setup_fds() < 0) {
-        setColor(RED);
+        set_term_color(RED);
         printf("ERROR: Failed to init FDs\n");
         return 1;
     }
     enable_interrupts();
-    if(initSerial(coms[0])) {
-        setColor(RED);
+    if(init_serial(coms[0])) {
+        set_term_color(RED);
         printf("ERROR : Failed to initialize serial port\n");
         return 1;
     }
@@ -90,34 +90,35 @@ int main(void) {
     printf("Memory available : %dKb\n", available_memory / 1024);
     
     if (init_paging(available_memory)) {
-        setColor(RED);
+        set_term_color(RED);
         puts("Cannot init paging");
     }
 
     if (init_malloc()) {
-        setColor(RED);
+        set_term_color(RED);
         puts("Cannot init malloc");
     }
 
     puts("Welcome to");
-    setColor(YELLOW);
+    set_term_color(YELLOW);
 
     puts("NoderyOS");
-    setColor(WHITE);
+    set_term_color(WHITE);
 
     if (init_fs(mbr->parts[0].lba_start) < 0) {
-        setColor(RED);
+        set_term_color(RED);
         printf("Cannot init FS\n");
         return 1;
     }
 
     if (load_elf("HELLOC.ELF") < 0) {
-        setColor(RED);
+        set_term_color(RED);
         printf("Cannot load ELF\n");
         return 1;
     }
     FILE *f = fopen("HELLO.TXT", "r");
     if (!f) {
+        set_term_color(RED);
         printf("Cannot open file\n");
         return 0;
     }

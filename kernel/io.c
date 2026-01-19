@@ -10,7 +10,7 @@
 
 void serialString(uint16_t port, char *str) {
     while(*str)
-        writeSerial(port, *str++);
+        write_serial(port, *str++);
 }
 
 int printf(const char *format, ...) {

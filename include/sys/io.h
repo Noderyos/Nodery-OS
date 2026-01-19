@@ -3,8 +3,8 @@
 
 #include "../types.h"
 
-typedef enum {
-    BLACK = 0xFF0,
+enum {
+    BLACK = 0xFF000000,
     DARK_BLUE = 0xFF00007F,
     DARK_GREEN = 0xFF007F00,
     DARK_CYAN = 0xFF007F7F,
@@ -20,16 +20,17 @@ typedef enum {
     PINK = 0xFFFF00FF,
     YELLOW = 0xFFFFFF00,
     WHITE = 0xFFFFFFFF
-} TermColor;
+};
 
 extern uint16_t *coms;
 extern uint16_t *lpts;
 
-int initSerial(uint16_t port);
-void writeSerial(uint16_t port, uint8_t c);
-uint8_t readSerial(uint16_t port);
+int init_serial(uint16_t port);
+void write_serial(uint16_t port, uint8_t c);
+uint8_t read_serial(uint16_t port);
 
-void setColor(TermColor color);
+void set_term_color(uint32_t color);
+uint32_t get_term_color();
 int putchar(int c);
 void backspace();
 

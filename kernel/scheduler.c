@@ -99,14 +99,14 @@ int create_task(uint32_t *pd_phys, void *entry) {
     *(--stack) = 0; // ESI
     *(--stack) = 0; // EDI
     
-    elf_task.esp = 0xD0000000 + PAGE_SIZE - 11*4;
+    elf_task.esp -= 11*4;
     
     for (uint32_t i = 0; i < MAX_TASKS; i++) {
         if (!tasks[i].present) {
             tasks[i] = elf_task;
-            break;
+            return 0;
         }
     }
 
-    return 0;
+    return -1;
 }

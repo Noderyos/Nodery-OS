@@ -141,7 +141,7 @@ int find_entry(char *name, struct fat_dir_entry *out_entry) {
         }
     } else {
         if (folder.cluster == 0) {
-            setColor(RED);
+            set_term_color(RED);
             printf("[ERROR] Cannot load directory");
             return -1;
         }

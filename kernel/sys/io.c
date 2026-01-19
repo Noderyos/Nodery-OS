@@ -292,7 +292,7 @@ void putpixel(uint16_t x, uint16_t y, uint32_t color) {
     vbe->framebuffer[where+2] = b/255;
 }
 
-int initSerial(uint16_t port) {
+int init_serial(uint16_t port) {
     outb(port + 1, 0x00);
     outb(port + 3, 0x80);
     outb(port + 3, 0x03);
@@ -308,39 +308,43 @@ int initSerial(uint16_t port) {
     return 0;
 }
 
-void writeSerial(uint16_t port, uint8_t c) {
+void write_serial(uint16_t port, uint8_t c) {
     outb(port, c);
 }
 
-uint8_t readSerial(uint16_t port) {
+uint8_t read_serial(uint16_t port) {
     return inb(port);
 }
 
 int scr_x = 0;
 int scr_y = 0;
-TermColor color = WHITE;
+uint32_t color = WHITE;
 
-void swipeTerm() {
+void swipe_term() {
     memcpy(vbe->framebuffer, &vbe->framebuffer[(SCR_WIDTH*3)*FONT_HEIGHT], SCR_WIDTH*(SCR_HEIGHT-FONT_HEIGHT)*3);
     memset(&vbe->framebuffer[(scr_y*SCR_WIDTH+scr_x) * 3], 0, SCR_WIDTH*FONT_HEIGHT*3);
 }
 
-void newLine() {
+void new_line() {
     scr_y += FONT_HEIGHT;
     scr_x = 0;
     if (scr_y > SCR_HEIGHT - FONT_HEIGHT) {
         scr_y -= FONT_HEIGHT;
-        swipeTerm();
+        swipe_term();
     }
 }
 
-void setColor(TermColor c) {
+void set_term_color(uint32_t c) {
     color = c;
+}
+
+uint32_t get_term_color() {
+    return color;
 }
 
 int putchar(int c) {
     if (c == '\n') {
-        newLine();
+        new_line();
         return (uint8_t)c;
     }
     
@@ -360,7 +364,7 @@ int putchar(int c) {
 
     scr_x += FONT_WIDTH;
     if (scr_x == SCR_WIDTH) {
-        newLine();
+        new_line();
     }
     return (uint8_t)c;
 }

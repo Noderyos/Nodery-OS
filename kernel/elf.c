@@ -11,7 +11,7 @@
 
 #define ERROR(x) \
     do { \
-        setColor(RED); \
+        set_term_color(RED); \
         printf("[ERROR] %s\n", x); \
     } while(0)
 

@@ -44,14 +44,20 @@ void *memcpy(void *dest, void *src, uint32_t n) {
 }
 
 void *mempcpy(void *dest, void *src, uint32_t n) {
-    uint8_t *d = (uint8_t*)dest;
-    uint8_t *s = (uint8_t*)src;
+    uint32_t dword_count = n/4;
+    uint32_t byte_count = n%4;
 
-    for (uint32_t i = 0; i < n; i++) {
-        d[i] = s[i];
-    }
+    __asm__ volatile (
+        "cld\n"
+        "rep movsl\n"
+        "movl %3, %%ecx\n"
+        "rep movsb\n"
+        : "+D"(dest), "+S"(src), "+c"(dword_count)
+        : "r"(byte_count)
+        : "memory"
+    );
 
-    return d + n;
+    return dest + n;
 }
 
 

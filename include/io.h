@@ -3,7 +3,8 @@
 
 #include "sys/io.h"
 
-void serialString(uint16_t port, char *str);
+void serial_string(uint16_t port, char *str);
+void serial_int(uint16_t port, uint32_t i);
 
 int puts(const char *s);
 int printf(const char *format, ...);

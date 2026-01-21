@@ -2,6 +2,7 @@
 #include "sys/vga.h"
 #include "sys/io.h"
 #include "io.h"
+#include "string.h"
 
 #define oob(x, y) ((x) < 0 || (y) < 0 || (x) > 800 || (y) > 600)
 #define abs(x) ((x)<0 ? -(x) : (x))
@@ -9,11 +10,29 @@
 void ui_clear(uint32_t color) {
     struct vbe_mode_info_structure *vbe = (void *)0x7E00;
     
-    void *fbuf = vbe->framebuffer;
-    uint32_t c = 0;
-    while (c++ < 800*600) {
-        *(uint32_t*)fbuf = color;
-        fbuf += 3;
+    uint32_t *fbuf = (uint32_t *)vbe->framebuffer;
+
+    uint32_t count = 800*600;
+
+    __asm__ volatile (
+        "cld\n"
+        "rep stosl"
+        : "+D"(fbuf), "+c"(count)
+        : "a"(color)
+        : "memory"
+    );
+}
+
+void ui_draw(uint16_t x, uint16_t y, uint32_t *buf, uint16_t w, uint16_t h) {
+    uint16_t r_w = w, r_h = h;
+    if (x + w > vbe->width) r_w = vbe->width - x;
+    if (y + h > vbe->height) r_h = vbe->height - y;
+
+    uint32_t *fbuf = (uint32_t*)vbe->framebuffer;
+
+    for (uint16_t dy = 0; dy < r_h; dy++) {
+        uint16_t cy = y + dy;
+        memcpy(&fbuf[cy*vbe->width + x], &buf[dy*w], r_w*4);
     }
 }
 

@@ -277,19 +277,30 @@ uint16_t *coms = (uint16_t*)0x400;
 uint16_t *lpts = (uint16_t*)0x408;
 
 void putpixel(uint16_t x, uint16_t y, uint32_t color) {
+    uint32_t* fbuf = (uint32_t*)vbe->framebuffer;
+    uint32_t where = (y*SCR_WIDTH+x);
+
     uint8_t a = (color>>24) & 0xFF;
-    uint32_t where = (y*SCR_WIDTH+x) * 3;
-    
-    uint32_t r = color & 0xFF, 
-             g = (color>>8) & 0xFF, 
+    if (a == 0) return;
+    if (a == 255) {
+        fbuf[where] = color;
+        return;
+    }
+
+    uint32_t r = color & 0xFF,
+             g = (color>>8) & 0xFF,
              b = (color>>16) & 0xFF;
-    
-    r = vbe->framebuffer[where] * (255-a) + r*a;
-    g = vbe->framebuffer[where+1] * (255-a) + g*a;
-    b = vbe->framebuffer[where+2] * (255-a) + b*a;
-    vbe->framebuffer[where] = r/255;
-    vbe->framebuffer[where+1] = g/255;
-    vbe->framebuffer[where+2] = b/255;
+
+    uint32_t bg = fbuf[where];
+    uint32_t b_bg = (bg >> 16) & 0xFF;
+    uint32_t g_bg = (bg >> 8) & 0xFF;
+    uint32_t r_bg = bg & 0xFF;
+
+    r = ((r - r_bg) * a) / 255 + r_bg;
+    g = ((g - g_bg) * a) / 255 + g_bg;
+    b = ((b - b_bg) * a) / 255 + b_bg;
+
+    fbuf[where] = (0xFF << 24) | (b << 16) | (g << 8) | r;
 }
 
 int init_serial(uint16_t port) {

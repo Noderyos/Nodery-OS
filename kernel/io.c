@@ -8,9 +8,14 @@
 #define va_arg(ap, type) (*({type* tmp = ap;(ap)+=sizeof(void*);tmp;}))
 
 
-void serialString(uint16_t port, char *str) {
+void serial_string(uint16_t port, char *str) {
     while(*str)
         write_serial(port, *str++);
+}
+
+void serial_int(uint16_t port, uint32_t a) {
+    if (a > 9) serial_int(port, a/10);
+    write_serial(port, '0' + (a%10));
 }
 
 int printf(const char *format, ...) {

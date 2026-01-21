@@ -20,16 +20,16 @@ mov word[EXTENDED_MEM], dx
 mov sp, 0x4000
 mov bp, 0x4000
 
-; Set video mode (800 x 600, 16m colors)
+; Set video mode (800x600@32)
 mov ax, 0x4f02
-mov bx, 0x115
+mov bx, 0x143
 int 10h
 
 ; Retrieve VBE informations
 mov ax, 0
 mov es, ax
 mov ax, 0x4F01
-mov cx, 0x0115
+mov cx, 0x0143
 mov di, VBE
 int 10h
 

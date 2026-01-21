@@ -21,6 +21,7 @@ C_SRCS= \
 	kernel/sys/lba.c \
 	kernel/sys/ps2.c \
 	kernel/sys/vga.c \
+	kernel/sys/timer.c \
 	kernel/sys/io.c
 
 ASM_SRCS= \

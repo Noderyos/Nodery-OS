@@ -3,6 +3,7 @@
 #include "io.h"
 #include "malloc.h"
 #include "string.h"
+#include "scheduler.h" 
 
 #define MIN(x,y) ((x)<(y)?(x):(y))
 #define MAX(x,y) ((x)>(y)?(x):(y))
@@ -49,11 +50,6 @@ struct fat_dir_entry {
 
 uint16_t *fat;
 
-struct {
-    uint32_t depth;
-    uint32_t cluster;
-} folder;
-
 uint32_t data_addr;
 
 uint32_t bytes_per_cluster;
@@ -78,8 +74,8 @@ int init_fs(uint32_t start_sector) {
     ata_lba_read(fat_addr, bs.sectors_per_fat, fat);
 
     root_entries_addr = fat_addr + bs.sectors_per_fat * bs.fat_count;
-    folder.depth = 0;
-    folder.cluster = 0;
+    current_task->cwd.depth = 0;
+    current_task->cwd.cluster = 0;
     
     data_addr = root_entries_addr + (bs.root_entry_count * sizeof(struct fat_dir_entry))/512;
     bytes_per_cluster = bs.sectors_per_cluster * bs.bytes_per_sector;
@@ -127,7 +123,7 @@ int find_entry(char *name, struct fat_dir_entry *out_entry) {
     struct fat_dir_entry *entries;
     char fname[13];
 
-    if (folder.depth == 0) {
+    if (current_task->cwd.depth == 0) {
         entries = malloc(bs.root_entry_count * sizeof(struct fat_dir_entry));
         ata_lba_read(root_entries_addr, (bs.root_entry_count * sizeof(struct fat_dir_entry))/512, entries);
         for (int i = 0; i < bs.root_entry_count; i++) {
@@ -139,16 +135,18 @@ int find_entry(char *name, struct fat_dir_entry *out_entry) {
                 break;
             }
         }
+        free(entries);
     } else {
-        if (folder.cluster == 0) {
+        if (current_task->cwd.cluster == 0) {
             set_term_color(RED);
             printf("[ERROR] Cannot load directory");
             return -1;
         }
 
-        uint32_t cluster = folder.cluster;
+        entries = malloc(bytes_per_cluster);
+        
+        uint32_t cluster = current_task->cwd.cluster;
         for (; cluster != 0xFFFF; cluster = fat[cluster]) {
-            entries = malloc(bytes_per_cluster);
             ata_lba_read(data_addr + (cluster-2)*bs.sectors_per_cluster, bs.sectors_per_cluster, entries);
             for (uint32_t i = 0; i < bytes_per_cluster/sizeof(*entries); i++) {
                 struct fat_dir_entry entry = entries[i];
@@ -161,6 +159,7 @@ int find_entry(char *name, struct fat_dir_entry *out_entry) {
             }
             if (idx >= 0) break;
         }
+        free(entries);
     }
     if (idx < 0) return -1;
     memcpy(out_entry, &entries[idx], sizeof(*out_entry));
@@ -170,17 +169,17 @@ int find_entry(char *name, struct fat_dir_entry *out_entry) {
 int chdir(char *dirname) {
     struct fat_dir_entry entry;
 
-    if (folder.depth == 0 && (strcmp(dirname, "..") == 0 || strcmp(dirname, ".") == 0)) {
+    if (current_task->cwd.depth == 0 && (strcmp(dirname, "..") == 0 || strcmp(dirname, ".") == 0)) {
         return 0;
     }
 
     if (find_entry(dirname, &entry) < 0) return -1;
     if (!entry.attr.Directory) return -1;
-    if (strcmp(dirname, "..") == 0) folder.depth--;
-    else if (strcmp(dirname, ".") != 0) folder.depth++;
+    if (strcmp(dirname, "..") == 0) current_task->cwd.depth--;
+    else if (strcmp(dirname, ".") != 0) current_task->cwd.depth++;
     
-    folder.cluster = entry.cluster;
-    if (folder.cluster == 0) folder.depth = 0;
+    current_task->cwd.cluster = entry.cluster;
+    if (current_task->cwd.cluster == 0) current_task->cwd.depth = 0;
 
     return 0;
 }

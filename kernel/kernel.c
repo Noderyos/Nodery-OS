@@ -6,14 +6,13 @@
 #include "scheduler.h"
 #include "sys/io.h"
 #include "io.h"
-#include "sys/lba.h"
 #include "mbr.h"
 #include "fat.h"
 #include "string.h"
-#include "sys/vga.h"
 #include "ui.h"
 #include "elf.h"
 #include "syscalls.h"
+#include "sys/timer.h"
 
 struct mbr *mbr = (void *)0x7c00;
 
@@ -53,13 +52,6 @@ void handle_mouse() {
 
 }
 
-uint32_t tick_count = 0;
-
-void handle_tick() {
-    tick_count++;
-    outb(PIC1_COMMAND, 0x20);
-}
-
 int main(void) {
     init_idt();
     kb_init();
@@ -97,6 +89,12 @@ int main(void) {
     if (init_malloc()) {
         set_term_color(RED);
         puts("Cannot init malloc");
+    }
+
+    printf("Timer initialization (1s) ...\n");
+    if (init_timer()) {
+        set_term_color(RED);
+        puts("Cannot init timer");
     }
 
     puts("Welcome to");

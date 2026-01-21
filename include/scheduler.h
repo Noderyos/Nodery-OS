@@ -2,10 +2,14 @@
 #define SCHEDULER_H
 
 #include "types.h"
+#include "fat.h"
+
+extern struct task *current_task;
 
 struct task {
     uint32_t esp;
     uint32_t cr3;
+    folder_t cwd;
     int present;
 };
 

@@ -16,6 +16,7 @@ void exit_task() {
 
 int init_multitasking() {
     tasks[0] = (struct task){.esp = 0, .cr3 = 0x80000, .present = 1};
+    tasks[0].cwd = (folder_t){.depth = 0, .cluster = 0};
     cur_task_idx = 0;
     current_task = &tasks[cur_task_idx];
     return 0;
@@ -101,6 +102,8 @@ int create_task(uint32_t *pd_phys, void *entry) {
     
     elf_task.esp -= 11*4;
     
+    elf_task.cwd = current_task->cwd;
+
     for (uint32_t i = 0; i < MAX_TASKS; i++) {
         if (!tasks[i].present) {
             tasks[i] = elf_task;

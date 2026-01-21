@@ -14,7 +14,7 @@
 // Paging flags
 #define PAGE_PRESENT 0b001
 #define PAGE_RW      0b010
-#define PAGE_USER    0b001
+#define PAGE_USER    0b100
 #define PAGE_DEFAULT (PAGE_PRESENT|PAGE_RW)
 
 int init_paging(uint32_t available_memory);

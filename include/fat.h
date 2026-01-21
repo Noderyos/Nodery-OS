@@ -7,7 +7,7 @@ typedef enum : uint8_t {
     disk = 0xF8
 } MediaDescriptor;
 
-struct __attribute__((packed)) fat_bootsector {
+struct fat_bootsector {
     uint8_t code_jump[3];
     char oem_id[8];
     uint16_t bytes_per_sector;
@@ -42,8 +42,14 @@ enum {
     SEEK_SET, SEEK_CUR, SEEK_END
 };
 
+typedef struct folder {
+    uint32_t depth;
+    uint32_t cluster;
+} folder_t;
+
 int init_fs(uint32_t start_sector);
 
+int chdir(char *dirname);
 uint32_t fread(void *buf, uint32_t size, uint32_t n, FILE *stream);
 FILE *fopen(char *path, char *mode);
 int fseek(FILE *stream, long offset, int whence);

@@ -65,7 +65,7 @@ int map_page(uint32_t *pd, void *phys_addr, void *virt_addr, uint32_t flags) {
 
     pt[pt_index] = ((uint32_t)phys_addr & 0xFFFFF000) | (flags & 0xFFF);
  
-    if (pd == PD_ADDR) asm volatile("invlpg (%0)" :: "r"(virt_addr) : "memory");
+    if (pd == PD_ADDR) __asm__ volatile("invlpg (%0)" :: "r"(virt_addr) : "memory");
     return 0;
 }
 
@@ -93,13 +93,13 @@ int init_paging(uint32_t available_memory) {
     page_directory[0] = (uint32_t)first_pt | PAGE_DEFAULT;
     page_directory[1023] = (uint32_t)page_directory | PAGE_DEFAULT;
     // Load page_directory
-    asm volatile("mov %0, %%cr3" :: "r"(page_directory));
+    __asm__ volatile("mov %0, %%cr3" :: "r"(page_directory));
 
     // Enable paging
     uint32_t cr0;
-    asm volatile("mov %%cr0, %0" : "=r"(cr0));
+    __asm__ volatile("mov %%cr0, %0" : "=r"(cr0));
     cr0 |= 0x80000000;
-    asm volatile("mov %0, %%cr0" :: "r"(cr0));
+    __asm__ volatile("mov %0, %%cr0" :: "r"(cr0));
     
     for (uint32_t i = 0; i < vbe->width*vbe->height*(vbe->bpp/8); i += PAGE_SIZE) {
         void* a = (void*)((uint32_t)vbe->framebuffer&0xFFFFF000) + i;

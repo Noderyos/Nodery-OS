@@ -3,7 +3,7 @@
 #define ATA_PRIMARY 0x1F0
 
 void ata_lba_read(uint32_t sector, uint8_t count, void *buf) {
-    asm("cli");
+    __asm__ volatile("cli");
     while(inb(ATA_PRIMARY+7) & 0x80);
 
     outb(ATA_PRIMARY+1, 0x00);
@@ -20,11 +20,11 @@ void ata_lba_read(uint32_t sector, uint8_t count, void *buf) {
             *(uint16_t*)buf = inw(ATA_PRIMARY);
         }
     }
-    asm("sti");
+    __asm__ volatile("sti");
 }
 
 void ata_lba_write(uint32_t sector, uint8_t count, void *buf) {
-    asm("cli");
+    __asm__ volatile("cli");
     while(inb(ATA_PRIMARY+7) & 0x80);
 
     outb(ATA_PRIMARY+1, 0x00);
@@ -41,6 +41,6 @@ void ata_lba_write(uint32_t sector, uint8_t count, void *buf) {
             outw(ATA_PRIMARY, *(uint16_t*)buf);
         }
     }
-    asm("sti");
+    __asm__ volatile("sti");
 }
 

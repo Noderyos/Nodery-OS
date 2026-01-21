@@ -2,7 +2,7 @@ AS=nasm
 CC=i386-elf-gcc
 LD=i386-elf-ld
 
-CFLAGS=-Wall -Wextra -Wno-packed-bitfield-compat -Iinclude -nolibc -nostdlib -ffreestanding -fpack-struct
+CFLAGS=-Wall -Wextra -Wno-packed-bitfield-compat -Iinclude -nolibc -nostdlib -ffreestanding -fpack-struct -std=c99
 LDFLAGS=-T linker.ld --oformat binary -Map=layout.map
 
 OBJDIR=obj

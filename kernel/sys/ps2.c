@@ -33,7 +33,7 @@ void cpu_exception_handler(struct exception_stack *r) {
     printf("CS=0x%x DS=0x%x ES=0x%x FS=0x%x GS=0x%x\n", r->cs, r->ds, r->es, r->fs, r->gs);
     printf("========================================\n");
 
-    for(;;) asm volatile("hlt");
+    for(;;) __asm__ volatile("hlt");
 }
 
 void init_idt() {

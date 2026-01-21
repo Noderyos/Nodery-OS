@@ -49,7 +49,7 @@ uint32_t read(FILE *f, uint8_t *buf, uint32_t len) {
     read_idx = 0;
     enter_pressed = 0;
     while(!enter_pressed && read_idx < read_len) {
-        asm volatile("sti; hlt");
+        __asm__ volatile("sti; hlt");
     }
     read_buf = 0;
     return read_idx;
@@ -133,11 +133,11 @@ uint32_t handle_syscall(regs_t *r) {
             // TODO: Switch thread
             printf("Exited code %d\n", code);
             exit_task();
-            asm("int $0x20");
+            __asm__ volatile("int $0x20");
             return 0;
         };break;
         case 3: { // read
-            asm volatile("sti");
+            __asm__ volatile("sti");
             uint32_t fd = r->ebx;
             if (!fds[fd].present) break;
             if (fds[fd].read == NULL) break;

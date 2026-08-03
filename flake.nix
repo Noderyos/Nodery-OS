@@ -2,10 +2,11 @@
   description = "Nodery-OS Nix flake";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
 
-  outputs = { self, nixpkgs }:
+  outputs =
+    { self, nixpkgs }:
     let
       pkgs = import nixpkgs { inherit system; };
-      
+
       system = "x86_64-linux";
       target = "i386-elf";
 
@@ -19,8 +20,10 @@
         src = ./.;
 
         nativeBuildInputs = [
-          binutilsCross gccCross
-          pkgs.gnumake pkgs.nasm
+          binutilsCross
+          gccCross
+          pkgs.gnumake
+          pkgs.nasm
         ];
 
         configurePhase = ''
@@ -53,8 +56,12 @@
 
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = [
-          binutilsCross gccCross
-          pkgs.gnumake pkgs.nasm pkgs.qemu pkgs.gdb
+          binutilsCross
+          gccCross
+          pkgs.gnumake
+          pkgs.nasm
+          pkgs.qemu
+          pkgs.gdb
         ];
       };
     };

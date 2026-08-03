@@ -1,6 +1,6 @@
-{ 
-  pkgs, 
-  target 
+{
+  pkgs,
+  target,
 }:
 
 pkgs.stdenv.mkDerivation (finalAttrs: {
@@ -13,7 +13,7 @@ pkgs.stdenv.mkDerivation (finalAttrs: {
   };
 
   enableParallelBuilding = true;
-  hardeningDisable = ["all"];
+  hardeningDisable = [ "all" ];
 
   configureFlags = [
     "--target=${target}"

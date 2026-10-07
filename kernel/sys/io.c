@@ -332,8 +332,11 @@ int scr_y = 0;
 uint32_t color = WHITE;
 
 void swipe_term() {
-    memcpy(vbe->framebuffer, &vbe->framebuffer[(SCR_WIDTH*3)*FONT_HEIGHT], SCR_WIDTH*(SCR_HEIGHT-FONT_HEIGHT)*3);
-    memset(&vbe->framebuffer[(scr_y*SCR_WIDTH+scr_x) * 3], 0, SCR_WIDTH*FONT_HEIGHT*3);
+    uint32_t line = SCR_WIDTH * 4;
+    uint32_t scroll = line * (SCR_HEIGHT - FONT_HEIGHT);
+
+    memcpy(vbe->framebuffer, &vbe->framebuffer[line * FONT_HEIGHT], scroll);
+    memset(&vbe->framebuffer[scroll], 0, line * FONT_HEIGHT);
 }
 
 void new_line() {
